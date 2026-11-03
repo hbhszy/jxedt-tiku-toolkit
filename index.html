@@ -629,6 +629,19 @@
   .moyu-tool-link:hover {
     background: rgba(128,128,128,0.15);
   }
+  .moyu-exit-btn {
+    color: #ef4444 !important;
+    font-weight: 600;
+  }
+  body.moyu-active.moyu-code .moyu-exit-btn {
+    color: #f87171 !important;
+  }
+  .moyu-inline-exit {
+    display: none;
+  }
+  body.moyu-active .moyu-inline-exit {
+    display: inline-flex;
+  }
   body.moyu-active .kb-hint {
     display: none !important;
   }
@@ -1409,6 +1422,52 @@
       max-height: 85vh;
       max-width: 100%;
     }
+
+    /* Mobile Moyu Bar Adaptation: Prevent right tools & exit button from overflowing off-screen */
+    .moyu-bar {
+      height: auto;
+      min-height: 32px;
+      flex-wrap: wrap;
+      padding: 4px 8px;
+      gap: 4px;
+    }
+    .moyu-skin-switch {
+      width: 100%;
+      overflow-x: auto;
+      border-bottom: 1px solid rgba(128, 128, 128, 0.16);
+      padding-bottom: 2px;
+    }
+    .moyu-skin-btn {
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      flex: 1;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    .moyu-right-tools {
+      width: 100%;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 2px;
+    }
+    .moyu-tool-link {
+      padding: 3px 6px;
+      font-size: 0.74rem;
+    }
+    body.moyu-active .moyu-inline-exit {
+      color: #ef4444 !important;
+      border-color: rgba(239, 68, 68, 0.45) !important;
+      font-weight: 600 !important;
+    }
+    body.moyu-active.moyu-code .moyu-inline-exit {
+      color: #f87171 !important;
+      border-color: rgba(248, 113, 113, 0.45) !important;
+    }
+    .boss-top-bar {
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 6px 10px;
+    }
   }
 </style>
 </head>
@@ -1428,7 +1487,7 @@
       <button class="moyu-tool-link" onclick="openCheatSheet()" title="查看速记口诀表">[Docs]</button>
       <button class="moyu-tool-link" onclick="openSheet()" title="打开答题卡">[Index]</button>
       <button class="moyu-tool-link" onclick="toggleBossScreen()" title="切换全屏报表 (快捷键 ` 或 X)">[Table: X]</button>
-      <button class="moyu-tool-link" onclick="toggleMoyuMode()" title="恢复标准界面 (快捷键 M)">[×]</button>
+      <button class="moyu-tool-link moyu-exit-btn" onclick="toggleMoyuMode()" title="恢复标准界面 (快捷键 M)">[× 退出摸鱼]</button>
     </div>
   </div>
 
@@ -1571,6 +1630,9 @@
         <span class="badge badge-core" id="badgeCore" style="display:none;">🔥 核心母题</span>
       </div>
       <div class="q-right-meta">
+        <button class="btn btn-outline moyu-inline-exit" onclick="toggleMoyuMode()" title="退出摸鱼模式，恢复正常界面 (快捷键 M)" style="padding:4px 8px; font-size:0.76rem;">
+          ✕ 退出摸鱼
+        </button>
         <button class="btn btn-outline" id="jumpUnansweredBtn" onclick="jumpToNextUnanswered()" title="一键跳到当前分类第一道还没做的题（快捷键 U）" style="padding:4px 8px; font-size:0.76rem;">
           ⏭️ 跳至未答 (U)
         </button>
@@ -1650,9 +1712,9 @@
 
 <!-- 🚨 Boss Key Fullscreen Decoy Overlay -->
 <div class="boss-overlay" id="bossOverlay" ondblclick="toggleBossScreen()">
-  <div class="boss-top-bar">
-    <div>📊 2026年度部门业务数据统计与预算执行进度表_v4.2_Final.xlsx - Microsoft Excel</div>
-    <div style="opacity:0.85; cursor:pointer;" onclick="toggleBossScreen()" title="按 ` / X / Esc 或双击任意处返回刷题">已保存到本地 ｜ [按 ` / X / Esc 键返回]</div>
+  <div class="boss-top-bar" onclick="toggleBossScreen(false)" style="cursor:pointer;">
+    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📊 2026年度部门业务数据统计与预算执行进度表_v4.2_Final.xlsx - Microsoft Excel</div>
+    <div style="opacity:0.95; cursor:pointer; flex-shrink:0; font-weight:600;" title="点击此处或按 ` / X / Esc 返回刷题">[× 点击返回刷题]</div>
   </div>
   <div class="boss-toolbar">
     <span><b>文件</b></span>
