@@ -14,9 +14,10 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Raw SQLite Databases (large binary client files)
+# Raw SQLite Databases & Bulk Export Cache
 *.db
 *.db-journal
 *.pak
 *.exe
 *.dll
+题库导出/
