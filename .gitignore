@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+~$*
+*.lnk
+.vscode/
+.idea/
+
+# Raw SQLite Databases (large binary client files)
+*.db
+*.db-journal
+*.pak
+*.exe
+*.dll
