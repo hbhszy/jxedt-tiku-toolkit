@@ -217,6 +217,42 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Wrong Book Practice Banner */
+  .wrongbook-banner {
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    color: #9f1239;
+    padding: 9px 14px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.84rem;
+  }
+  .wrongbook-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .wb-toggle-label {
+    font-size: 0.78rem;
+    color: #881337;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    user-select: none;
+    background: #fff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid #fda4af;
+    font-weight: 500;
+  }
+
   main {
     flex: 1;
     max-width: 980px;
@@ -666,12 +702,21 @@
   body.moyu-active.moyu-hide-header header .filter-container {
     display: none !important;
   }
-  body.moyu-active .kill-toggle-label {
+  body.moyu-active .kill-toggle-label,
+  body.moyu-active .wb-toggle-label {
     background: transparent !important;
     border-color: #cbd5e1 !important;
     color: #64748b !important;
     border-radius: 3px;
     padding: 1px 6px;
+  }
+  body.moyu-active .wrongbook-banner {
+    background: transparent !important;
+    border-color: #cbd5e1 !important;
+    color: #64748b !important;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.76rem;
   }
   body.moyu-active .kb-hint {
     opacity: 0.45;
@@ -1025,12 +1070,17 @@
   body.moyu-active.moyu-code .brand,
   body.moyu-active.moyu-code .btn,
   body.moyu-active.moyu-code .filter-chip,
-  body.moyu-active.moyu-code .kill-toggle-label {
+  body.moyu-active.moyu-code .kill-toggle-label,
+  body.moyu-active.moyu-code .wb-toggle-label {
     color: #6e7681 !important;
     border-color: #2d2d2d !important;
     background: transparent !important;
     font-size: 11.5px;
     padding: 1px 6px;
+  }
+  body.moyu-active.moyu-code .wrongbook-banner {
+    border-color: #2d2d2d !important;
+    color: #6e7681 !important;
   }
   body.moyu-active.moyu-code .badge {
     border-color: #2d2d2d !important;
@@ -1604,6 +1654,25 @@
     </div>
   </div>
 
+  <!-- Wrong Book Independent Practice Banner -->
+  <div class="wrongbook-banner" id="wrongBookBanner">
+    <div id="wbStatText">
+      <strong>📕 错题本独立重做</strong>（本轮已练 0/0 ｜ 答对 0 ｜ 答错 0）
+    </div>
+    <div class="wrongbook-actions">
+      <label class="wb-toggle-label" title="勾选后，在错题本中重新答对的题目将自动从错题本移出">
+        <input type="checkbox" id="autoRemoveWrongToggle" onchange="toggleAutoRemoveWrong(this.checked)">
+        <span id="wbAutoRemoveLabel">答对自动移出</span>
+      </label>
+      <button class="btn btn-outline" id="wbRedoAllBtn" onclick="resetWrongBookPractice()" title="清空错题本本轮重做痕迹，从第1题重新做一遍（不会删除错题）" style="padding:4px 9px; font-size:0.78rem;">
+        🔄 重刷错题
+      </button>
+      <button class="btn btn-outline" id="wbRemoveCurBtn" onclick="removeCurrentFromWrongBook()" title="已掌握这道错题？点此将它从错题本移出" style="padding:4px 9px; font-size:0.78rem;">
+        ✅ 移出本题
+      </button>
+    </div>
+  </div>
+
   <!-- Fake TypeScript Code Context (Top Camouflage in Code Skin) -->
   <div class="code-camo">
     <div class="code-line"><span class="ln">1</span><span><span class="ck">import</span> { <span class="ct">Injectable</span>, <span class="ct">ExecutionContext</span>, <span class="ct">Logger</span> } <span class="ck">from</span> <span class="cs">'@nestjs/common'</span>;</span></div>
@@ -1660,7 +1729,10 @@
     <div class="answer-panel" id="answerPanel" style="display:none;">
       <div class="answer-header">
         <div><span id="ansLabelPrefix">正确答案：</span><span class="ans-tag" id="ansText">A</span></div>
-        <div id="judgeResult" style="font-weight:600;"></div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div id="judgeResult" style="font-weight:600;"></div>
+          <button class="btn btn-outline" id="redoSingleBtn" onclick="redoCurrentQuestion()" title="擦除本题作答记录，立即重新做一次 (快捷键 R)" style="padding:2px 8px; font-size:0.76rem; display:none;">🔄 重做本题 (R)</button>
+        </div>
       </div>
 
       <div class="tip-box" id="tipBox" style="display:none;">
@@ -1918,10 +1990,22 @@ let mockSecondsLeft = 45 * 60;
 let mockAnswers = {};
 
 let userHistory = JSON.parse(localStorage.getItem('wx_km1_history') || '{}');
+let wrongBookHistory = JSON.parse(localStorage.getItem('wx_km1_wrong_history') || '{}');
+let autoRemoveWrongOnCorrect = localStorage.getItem('wx_km1_auto_remove_wrong') === '1';
 let wrongList = JSON.parse(localStorage.getItem('wx_km1_wrongs') || '[]');
 let killedList = JSON.parse(localStorage.getItem('wx_km1_killed') || '[]');
 let savedPositions = JSON.parse(localStorage.getItem('wx_km1_positions') || '{}');
 let savedLastView = JSON.parse(localStorage.getItem('wx_km1_last_view') || 'null');
+
+function isWrongBookView() {
+  return !isMockExam && !currentTopic && currentFilter === 'wrongBook';
+}
+
+function getActiveHistoryMap() {
+  if (isMockExam) return mockAnswers;
+  if (isWrongBookView()) return wrongBookHistory;
+  return userHistory;
+}
 
 function getActiveViewKey() {
   return currentTopic ? ('topic:' + currentTopic) : ('filter:' + currentFilter);
@@ -1968,13 +2052,14 @@ function restorePositionForCurrentView() {
     }
   }
   // 3. If no saved position for this category yet, jump automatically to the first unanswered question!
-  const firstUnanswered = filteredQuestions.findIndex(q => !userHistory[q.id]);
+  const historyMap = getActiveHistoryMap();
+  const firstUnanswered = filteredQuestions.findIndex(q => !historyMap[q.id]);
   currentIndex = firstUnanswered !== -1 ? firstUnanswered : 0;
 }
 
 function jumpToNextUnanswered() {
   if (filteredQuestions.length === 0) return;
-  const historyMap = isMockExam ? mockAnswers : userHistory;
+  const historyMap = getActiveHistoryMap();
   // Search from currentIndex + 1, then wrap around from 0
   let idx = filteredQuestions.findIndex((q, i) => i > currentIndex && !historyMap[q.id]);
   if (idx === -1) {
@@ -1985,7 +2070,13 @@ function jumpToNextUnanswered() {
     renderQuestion();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
-    alert('🎉 当前列表下的所有题目都已经做完啦！');
+    if (isWrongBookView() && wrongList.length > 0) {
+      if (confirm('🎉 错题本中的所有题目本轮都已重做完毕！是否清空本轮作答痕迹、再刷一遍？')) {
+        resetWrongBookPractice(true);
+      }
+    } else {
+      alert('🎉 当前列表下的所有题目都已经做完啦！');
+    }
   }
 }
 
@@ -2055,6 +2146,12 @@ function applyMoyuUI() {
     if (expPrefix) expPrefix.innerText = '// Spec: ';
     const multiBtn = document.getElementById('multiSubmitBtn');
     if (multiBtn) multiBtn.innerText = 'Commit Selection [Enter]';
+    const wbAutoLbl = document.getElementById('wbAutoRemoveLabel');
+    if (wbAutoLbl) wbAutoLbl.innerText = 'Auto-pop on Pass';
+    const wbRedoBtn = document.getElementById('wbRedoAllBtn');
+    if (wbRedoBtn) wbRedoBtn.innerText = 'Reset Queue';
+    const wbRemBtn = document.getElementById('wbRemoveCurBtn');
+    if (wbRemBtn) wbRemBtn.innerText = 'Pop Item';
 
     document.title = MOYU_TITLES[moyuSkin] || MOYU_TITLES.code;
     if (brandTitle) {
@@ -2075,6 +2172,12 @@ function applyMoyuUI() {
     if (expPrefix) expPrefix.innerText = '📖 官方考点详解：';
     const multiBtn = document.getElementById('multiSubmitBtn');
     if (multiBtn) multiBtn.innerText = '✅ 确认提交多选答案';
+    const wbAutoLbl = document.getElementById('wbAutoRemoveLabel');
+    if (wbAutoLbl) wbAutoLbl.innerText = '答对自动移出';
+    const wbRedoBtn = document.getElementById('wbRedoAllBtn');
+    if (wbRedoBtn) wbRedoBtn.innerText = '🔄 重刷错题';
+    const wbRemBtn = document.getElementById('wbRemoveCurBtn');
+    if (wbRemBtn) wbRemBtn.innerText = '✅ 移出本题';
 
     document.title = NORMAL_TITLE;
     if (brandTitle) {
@@ -2123,6 +2226,7 @@ function toggleBossScreen(forceState) {
 
 function saveState() {
   localStorage.setItem('wx_km1_history', JSON.stringify(userHistory));
+  localStorage.setItem('wx_km1_wrong_history', JSON.stringify(wrongBookHistory));
   localStorage.setItem('wx_km1_wrongs', JSON.stringify(wrongList));
   localStorage.setItem('wx_km1_killed', JSON.stringify(killedList));
   updateCounts();
@@ -2157,6 +2261,7 @@ function buildSyncPayload() {
     updatedAt: Date.now(),
     updatedTimeStr: new Date().toLocaleString('zh-CN'),
     userHistory,
+    wrongBookHistory,
     wrongList,
     killedList,
     savedPositions,
@@ -2168,6 +2273,7 @@ function applySyncPayload(remote, mode = 'merge') {
   if (!remote || typeof remote !== 'object') return false;
   if (mode === 'overwrite') {
     userHistory = remote.userHistory || {};
+    wrongBookHistory = remote.wrongBookHistory || {};
     wrongList = Array.isArray(remote.wrongList) ? remote.wrongList : [];
     killedList = Array.isArray(remote.killedList) ? remote.killedList : [];
     savedPositions = remote.savedPositions || {};
@@ -2175,6 +2281,7 @@ function applySyncPayload(remote, mode = 'merge') {
   } else {
     // Smart merge: combine answered history, wrongs, killed, and take newer position per category
     userHistory = { ...(remote.userHistory || {}), ...userHistory };
+    wrongBookHistory = { ...(remote.wrongBookHistory || {}), ...wrongBookHistory };
     const wSet = new Set([...(remote.wrongList || []), ...wrongList]);
     wrongList = Array.from(wSet);
     const kSet = new Set([...(remote.killedList || []), ...killedList]);
@@ -2192,6 +2299,7 @@ function applySyncPayload(remote, mode = 'merge') {
   }
 
   localStorage.setItem('wx_km1_history', JSON.stringify(userHistory));
+  localStorage.setItem('wx_km1_wrong_history', JSON.stringify(wrongBookHistory));
   localStorage.setItem('wx_km1_wrongs', JSON.stringify(wrongList));
   localStorage.setItem('wx_km1_killed', JSON.stringify(killedList));
   localStorage.setItem('wx_km1_positions', JSON.stringify(savedPositions));
@@ -2409,6 +2517,51 @@ function toggleAutoNext(checked) {
   autoNextOnCorrect = checked;
 }
 
+function toggleAutoRemoveWrong(checked) {
+  autoRemoveWrongOnCorrect = checked;
+  localStorage.setItem('wx_km1_auto_remove_wrong', checked ? '1' : '0');
+}
+
+function resetWrongBookPractice(silent = false) {
+  if (wrongList.length === 0) return;
+  const doneCnt = wrongList.filter(id => wrongBookHistory[id]).length;
+  if (!silent && doneCnt > 0 && !confirm(`确定要清空错题本本轮已做的 ${doneCnt} 道题作答痕迹，从第 1 题重新做一遍吗？（错题本身不会被删除）`)) {
+    return;
+  }
+  wrongBookHistory = {};
+  delete savedPositions['filter:wrongBook'];
+  localStorage.setItem('wx_km1_positions', JSON.stringify(savedPositions));
+  currentIndex = 0;
+  saveState();
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function removeCurrentFromWrongBook() {
+  if (filteredQuestions.length === 0) return;
+  const q = filteredQuestions[currentIndex];
+  const idx = wrongList.indexOf(q.id);
+  if (idx !== -1) {
+    wrongList.splice(idx, 1);
+    delete wrongBookHistory[q.id];
+    saveState();
+    if (isWrongBookView()) {
+      applyFilters();
+    }
+    renderQuestion();
+  }
+}
+
+function redoCurrentQuestion() {
+  if (filteredQuestions.length === 0 || isReciteMode) return;
+  const q = filteredQuestions[currentIndex];
+  const historyMap = getActiveHistoryMap();
+  if (!historyMap[q.id]) return;
+  delete historyMap[q.id];
+  saveState();
+  renderQuestion();
+}
+
 function applyFilters() {
   let base = [...RAW_QUESTIONS];
   if (currentTopic) {
@@ -2447,7 +2600,7 @@ function updateCounts() {
   document.getElementById('killedChipCount').innerText = killedList.length;
 
   let activePool = filteredQuestions;
-  let historyMap = isMockExam ? mockAnswers : userHistory;
+  let historyMap = getActiveHistoryMap();
 
   let doneInPool = activePool.filter(q => historyMap[q.id]).length;
   let correctInPool = activePool.filter(q => historyMap[q.id] && historyMap[q.id].correct).length;
@@ -2459,6 +2612,22 @@ function updateCounts() {
   document.getElementById('statInfo').innerText = isMoyuMode
     ? `Checked: ${doneInPool}/${activePool.length} (${rate}%)`
     : `当前列表已答: ${doneInPool} / ${activePool.length} ｜ 正确率: ${rate}%`;
+
+  const wbBanner = document.getElementById('wrongBookBanner');
+  if (wbBanner) {
+    if (isWrongBookView()) {
+      wbBanner.style.display = 'flex';
+      const wrongInWb = doneInPool - correctInPool;
+      const wbStat = document.getElementById('wbStatText');
+      if (wbStat) {
+        wbStat.innerHTML = isMoyuMode
+          ? `<strong>[RETRY_QUEUE]</strong> Tested: ${doneInPool}/${activePool.length} | Pass: ${correctInPool} | Fail: ${wrongInWb}`
+          : `<strong>📕 错题本独立重做</strong>（本轮已练 ${doneInPool}/${activePool.length} ｜ 答对 ${correctInPool} ｜ 答错 ${wrongInWb}）`;
+      }
+    } else {
+      wbBanner.style.display = 'none';
+    }
+  }
 
   if (isMockExam) {
     let wrongInExam = doneInPool - correctInPool;
@@ -2475,9 +2644,25 @@ function setFilter(type, el) {
   if (isMockExam && !confirm('正在进行全真模拟考试，切换题库将退出模考，确定吗？')) return;
   if (isMockExam) exitMockExam(true);
 
-  if (type === 'wrongBook' && wrongList.length === 0) {
-    alert('错题本目前为空！做错的题目会自动收入此处。');
-    return;
+  if (type === 'wrongBook') {
+    if (wrongList.length === 0) {
+      alert('错题本目前为空！做错的题目会自动收入此处。');
+      return;
+    }
+    const wbPool = RAW_QUESTIONS.filter(q => wrongList.includes(q.id) && (!hideKilled || !killedList.includes(q.id)));
+    const doneInWb = wbPool.filter(q => wrongBookHistory[q.id]).length;
+    if (currentFilter === 'wrongBook' && !currentTopic && doneInWb > 0) {
+      resetWrongBookPractice(false);
+      return;
+    }
+    if (wbPool.length > 0 && doneInWb === wbPool.length) {
+      if (confirm('错题本中的题目上一轮已全部重做完毕，是否清空上轮作答痕迹、重新做一遍？')) {
+        wrongBookHistory = {};
+        delete savedPositions['filter:wrongBook'];
+        localStorage.setItem('wx_km1_positions', JSON.stringify(savedPositions));
+        saveState();
+      }
+    }
   }
   if (type === 'killedBook' && killedList.length === 0) {
     alert('已斩题库目前为空！刷题时点击【⚡斩题】可将简单题移入此处。');
@@ -2558,7 +2743,11 @@ function getCleanAnsLetters(q) {
 function renderQuestion() {
   tempMultiSelected = [];
   if (filteredQuestions.length === 0) {
-    document.getElementById('qText').innerHTML = "🎉 太棒了！当前分类下的题目已全部被你【斩掉/清空】！<br><span style='font-size:0.9rem;color:#6b7280;font-weight:normal;'>你可以切换上方其他分类，或点开“🎛️专项/设置”取消勾选“隐藏已斩”。</span>";
+    if (isWrongBookView()) {
+      document.getElementById('qText').innerHTML = "🎉 太棒了！【❌ 错题本】中的题目已全部被你移出或斩掉！<br><span style='font-size:0.9rem;color:#6b7280;font-weight:normal;'>你可以点击上方其他题库分类继续刷题。</span>";
+    } else {
+      document.getElementById('qText').innerHTML = "🎉 太棒了！当前分类下的题目已全部被你【斩掉/清空】！<br><span style='font-size:0.9rem;color:#6b7280;font-weight:normal;'>你可以切换上方其他分类，或点开“🎛️专项/设置”取消勾选“隐藏已斩”。</span>";
+    }
     document.getElementById('mediaBox').style.display = 'none';
     document.getElementById('optionsBox').innerHTML = '';
     document.getElementById('multiSubmitBar').style.display = 'none';
@@ -2570,7 +2759,7 @@ function renderQuestion() {
   }
 
   const q = filteredQuestions[currentIndex];
-  const historyMap = isMockExam ? mockAnswers : userHistory;
+  const historyMap = getActiveHistoryMap();
   const userAns = historyMap[q.id];
   const isMulti = q.type === '多选题';
 
@@ -2697,7 +2886,12 @@ function renderQuestion() {
     document.getElementById('ansText').innerText = q.ans;
 
     const judge = document.getElementById('judgeResult');
+    const redoBtn = document.getElementById('redoSingleBtn');
     if (!isReciteMode && userAns) {
+      if (redoBtn) {
+        redoBtn.style.display = 'inline-flex';
+        redoBtn.innerText = isMoyuMode ? 'Retry [R]' : '🔄 重做本题 (R)';
+      }
       if (isMoyuMode) {
         judge.innerText = userAns.correct ? '[PASS]' : `[DIFF: selected ${userAns.choice}]`;
         judge.style.color = userAns.correct ? '#6a9955' : '#858585';
@@ -2707,6 +2901,7 @@ function renderQuestion() {
       }
     } else {
       judge.innerText = '';
+      if (redoBtn) redoBtn.style.display = 'none';
     }
 
     if (q.tip && q.tip.trim()) {
@@ -2741,7 +2936,7 @@ function renderQuestion() {
 function handleSelectOption(chosenLabel) {
   if (filteredQuestions.length === 0) return;
   const q = filteredQuestions[currentIndex];
-  const historyMap = isMockExam ? mockAnswers : userHistory;
+  const historyMap = getActiveHistoryMap();
   if (historyMap[q.id]) return;
 
   if (q.type === '多选题') {
@@ -2781,19 +2976,42 @@ function submitMultiChoice() {
 }
 
 function recordAnswer(q, chosenStr, isCorrect) {
+  const inWrongBook = isWrongBookView();
   if (isMockExam) {
     mockAnswers[q.id] = { choice: chosenStr, correct: isCorrect };
+    userHistory[q.id] = { choice: chosenStr, correct: isCorrect };
+  } else if (inWrongBook) {
+    wrongBookHistory[q.id] = { choice: chosenStr, correct: isCorrect };
+  } else {
+    userHistory[q.id] = { choice: chosenStr, correct: isCorrect };
   }
-  userHistory[q.id] = { choice: chosenStr, correct: isCorrect };
 
   if (!isCorrect) {
     if (!wrongList.includes(q.id)) {
       wrongList.push(q.id);
     }
+    if (!inWrongBook) {
+      delete wrongBookHistory[q.id];
+    }
   }
 
   saveState();
   renderQuestion();
+
+  // In wrongBook with auto-remove enabled: remove from wrongList after brief feedback
+  if (inWrongBook && isCorrect && autoRemoveWrongOnCorrect) {
+    const answeredId = q.id;
+    setTimeout(() => {
+      const idx = wrongList.indexOf(answeredId);
+      if (idx !== -1) wrongList.splice(idx, 1);
+      delete wrongBookHistory[answeredId];
+      saveState();
+      applyFilters();
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 380);
+    return;
+  }
 
   // Auto-advance to next question if answered correctly and autoNextOnCorrect is enabled
   if (isCorrect && (isMockExam || autoNextOnCorrect) && currentIndex < filteredQuestions.length - 1) {
@@ -2889,9 +3107,7 @@ function submitMockExam() {
 
   exitMockExam(true);
   if (reviewWrongs && examWrongs.length > 0) {
-    filteredQuestions = examWrongs;
-    currentIndex = 0;
-    renderQuestion();
+    setFilter('wrongBook', document.querySelector('[data-filter="wrongBook"]'));
   }
 }
 
@@ -2942,7 +3158,7 @@ function openSheet() {
   const modal = document.getElementById('sheetModal');
   const grid = document.getElementById('sheetGrid');
   grid.innerHTML = '';
-  const historyMap = isMockExam ? mockAnswers : userHistory;
+  const historyMap = getActiveHistoryMap();
 
   filteredQuestions.forEach((q, idx) => {
     const box = document.createElement('div');
@@ -2992,9 +3208,11 @@ function closeLightbox() {
 function clearProgress() {
   if (confirm('确定要清空全部做题记录、错题本、已斩题记录和刷题位置吗？')) {
     userHistory = {};
+    wrongBookHistory = {};
     wrongList = [];
     killedList = [];
     savedPositions = {};
+    localStorage.removeItem('wx_km1_wrong_history');
     localStorage.removeItem('wx_km1_positions');
     localStorage.removeItem('wx_km1_last_view');
     currentIndex = 0;
@@ -3090,6 +3308,12 @@ window.addEventListener('keydown', (e) => {
     jumpToNextUnanswered();
     return;
   }
+  // 🔄 Redo current question: R
+  if (key === 'R') {
+    e.preventDefault();
+    redoCurrentQuestion();
+    return;
+  }
 
   if (['A', '1'].includes(key)) handleSelectOption('A');
   else if (['B', '2'].includes(key)) handleSelectOption('B');
@@ -3102,7 +3326,7 @@ window.addEventListener('keydown', (e) => {
   else if (e.key === 'ArrowLeft') prevQ();
   else if (e.key === 'Enter') {
     const q = filteredQuestions[currentIndex];
-    const historyMap = isMockExam ? mockAnswers : userHistory;
+    const historyMap = getActiveHistoryMap();
     if (q && q.type === '多选题' && !isReciteMode && !historyMap[q.id] && tempMultiSelected.length >= 2) {
       e.preventDefault();
       submitMultiChoice();
@@ -3133,6 +3357,8 @@ window.addEventListener('keydown', (e) => {
 });
 
 // Init: Restore last active filter/topic & question position
+const autoRemToggle = document.getElementById('autoRemoveWrongToggle');
+if (autoRemToggle) autoRemToggle.checked = autoRemoveWrongOnCorrect;
 applyMoyuUI();
 if (savedLastView) {
   if (savedLastView.topic) {
