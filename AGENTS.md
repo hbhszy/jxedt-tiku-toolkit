@@ -121,3 +121,7 @@ python "C:\Users\Zhanying\.gemini\antigravity\brain\a30f0404-5717-421f-b69b-e500
    * JSON 与 Python 源码统一使用 `utf-8`。
 3. **保护原厂可执行程序**：
    * 严禁修改或破坏 `resources.pak`、`jxedt.exe` 及相关动态链接库（DLL），所有分析与提取工作只针对数据库及纯文本资源进行。
+4. **在线部署（GitHub Pages）**：
+   * 本项目直接推送 `main` 分支即通过 GitHub Pages 发布刷题前端，**无需本地启动 HTTP 服务验证**，也禁止额外打开本地服务器。
+   * 在线地址：`https://hbhszy.github.io/jxedt-tiku-toolkit/`（仓库 `hbhszy/jxedt-tiku-toolkit` 的 `main` 分支，`index.html` 为入口）。
+   * 验证改动时直接打开该线上地址刷新即可；如需快速自测，只能用浏览器打开本地 `index.html` 文件（`file://`），不要启动任何本地服务器。
