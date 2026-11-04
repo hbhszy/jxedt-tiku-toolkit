@@ -1537,7 +1537,7 @@
       <button class="moyu-tool-link" onclick="openCheatSheet()" title="查看速记口诀表">[Docs]</button>
       <button class="moyu-tool-link" onclick="openSheet()" title="打开答题卡">[Index]</button>
       <button class="moyu-tool-link" onclick="toggleBossScreen()" title="切换全屏报表 (快捷键 ` 或 X)">[Table: X]</button>
-      <button class="moyu-tool-link moyu-exit-btn" onclick="toggleMoyuMode()" title="恢复标准界面 (快捷键 M)">[× 退出摸鱼]</button>
+      <button class="moyu-tool-link moyu-exit-btn" id="moyuExitBtn" onclick="toggleMoyuMode()" title="恢复标准界面 (快捷键 M)">[× Exit]</button>
     </div>
   </div>
 
@@ -1617,7 +1617,7 @@
       <div class="filter-group-row" style="margin-top:6px;">
         <div class="filter-group-title">📚 7大考点专项突破：</div>
         <div class="toggle-switches">
-          <label class="kill-toggle-label" title="答对后自动跳到下一题，答错则停留看解析">
+          <label class="kill-toggle-label" title="答对后自动跳到下一道未答题（跳过已答题），答错则停留看解析">
             <input type="checkbox" id="autoNextToggle" checked onchange="toggleAutoNext(this.checked)">
             答对自动下一题
           </label>
@@ -1699,8 +1699,8 @@
         <span class="badge badge-core" id="badgeCore" style="display:none;">🔥 核心母题</span>
       </div>
       <div class="q-right-meta">
-        <button class="btn btn-outline moyu-inline-exit" onclick="toggleMoyuMode()" title="退出摸鱼模式，恢复正常界面 (快捷键 M)" style="padding:4px 8px; font-size:0.76rem;">
-          ✕ 退出摸鱼
+        <button class="btn btn-outline moyu-inline-exit" id="moyuInlineExitBtn" onclick="toggleMoyuMode()" title="恢复标准界面 (快捷键 M)" style="padding:4px 8px; font-size:0.76rem;">
+          ✕ Exit
         </button>
         <button class="btn btn-outline" id="jumpUnansweredBtn" onclick="jumpToNextUnanswered()" title="一键跳到当前分类第一道还没做的题（快捷键 U）" style="padding:4px 8px; font-size:0.76rem;">
           ⏭️ 跳至未答 (U)
@@ -1786,7 +1786,7 @@
 <div class="boss-overlay" id="bossOverlay" ondblclick="toggleBossScreen()">
   <div class="boss-top-bar" onclick="toggleBossScreen(false)" style="cursor:pointer;">
     <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📊 2026年度部门业务数据统计与预算执行进度表_v4.2_Final.xlsx - Microsoft Excel</div>
-    <div style="opacity:0.95; cursor:pointer; flex-shrink:0; font-weight:600;" title="点击此处或按 ` / X / Esc 返回刷题">[× 点击返回刷题]</div>
+    <div style="opacity:0.95; cursor:pointer; flex-shrink:0; font-weight:600;" title="点击此处或按 ` / X / Esc 还原视图">[× 还原视图]</div>
   </div>
   <div class="boss-toolbar">
     <span><b>文件</b></span>
@@ -2137,6 +2137,11 @@ function applyMoyuUI() {
     if (moyuBtn) {
       moyuBtn.classList.add('active');
       moyuBtn.innerText = 'View: Compact';
+      moyuBtn.title = '恢复标准界面 (快捷键 M)';
+      const exitBtn = document.getElementById('moyuExitBtn');
+      if (exitBtn) exitBtn.innerText = '[× Exit]';
+      const inlineExit = document.getElementById('moyuInlineExitBtn');
+      if (inlineExit) inlineExit.innerText = '✕ Exit';
     }
     if (jumpBtn) jumpBtn.innerText = 'Next [U]';
     if (prevBtn) prevBtn.innerText = '← Prev';
@@ -2163,6 +2168,7 @@ function applyMoyuUI() {
     if (moyuBtn) {
       moyuBtn.classList.remove('active');
       moyuBtn.innerText = '🐟 摸鱼';
+      moyuBtn.title = '开启/关闭上班摸鱼伪装模式（快捷键 M）';
     }
     if (jumpBtn) jumpBtn.innerText = '⏭️ 跳至未答 (U)';
     if (prevBtn) prevBtn.innerText = '⬅️ 上一题 (←)';
@@ -3007,20 +3013,39 @@ function recordAnswer(q, chosenStr, isCorrect) {
       delete wrongBookHistory[answeredId];
       saveState();
       applyFilters();
+      if (filteredQuestions.length > 0) {
+        const historyMap = getActiveHistoryMap();
+        if (historyMap[filteredQuestions[currentIndex]?.id]) {
+          let nextIdx = filteredQuestions.findIndex((item, i) => i > currentIndex && !historyMap[item.id]);
+          if (nextIdx === -1) {
+            nextIdx = filteredQuestions.findIndex((item, i) => i < currentIndex && !historyMap[item.id]);
+          }
+          if (nextIdx !== -1) {
+            currentIndex = nextIdx;
+          }
+        }
+      }
       renderQuestion();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 380);
     return;
   }
 
-  // Auto-advance to next question if answered correctly and autoNextOnCorrect is enabled
-  if (isCorrect && (isMockExam || autoNextOnCorrect) && currentIndex < filteredQuestions.length - 1) {
+  // Auto-advance to next unanswered question if answered correctly and autoNextOnCorrect is enabled
+  if (isCorrect && (isMockExam || autoNextOnCorrect)) {
     const answeredId = q.id;
     setTimeout(() => {
-      if (filteredQuestions[currentIndex] && filteredQuestions[currentIndex].id === answeredId && currentIndex < filteredQuestions.length - 1) {
-        currentIndex++;
-        renderQuestion();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (filteredQuestions[currentIndex] && filteredQuestions[currentIndex].id === answeredId) {
+        const historyMap = getActiveHistoryMap();
+        let nextIdx = filteredQuestions.findIndex((item, i) => i > currentIndex && !historyMap[item.id]);
+        if (nextIdx === -1) {
+          nextIdx = filteredQuestions.findIndex((item, i) => i < currentIndex && !historyMap[item.id]);
+        }
+        if (nextIdx !== -1) {
+          currentIndex = nextIdx;
+          renderQuestion();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       }
     }, 380);
   }

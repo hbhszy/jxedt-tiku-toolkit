@@ -21,3 +21,4 @@ Thumbs.db
 *.exe
 *.dll
 题库导出/
+.claude/
