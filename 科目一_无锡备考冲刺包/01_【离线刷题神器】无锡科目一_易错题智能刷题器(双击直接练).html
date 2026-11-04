@@ -1948,8 +1948,12 @@
             <button class="btn btn-primary" onclick="saveAndSyncCloud('merge')">🔗 保存并智能同步</button>
             <button class="btn btn-outline" onclick="saveAndSyncCloud('push')">⬆️ 本地覆盖云端</button>
             <button class="btn btn-outline" onclick="saveAndSyncCloud('pull')">⬇️ 云端覆盖本地</button>
+            <button class="btn btn-outline" style="color:#dc2626;" onclick="clearCloudToken()">🗑️ 清除Token</button>
           </div>
           <div id="cloudSyncStatusMsg" style="font-size:0.78rem; color:#059669; margin-top:2px;">状态：未配置云同步</div>
+          <div style="font-size:0.74rem; color:#64748b; margin-top:6px; line-height:1.45; background:#f1f5f9; padding:8px; border-radius:6px;">
+            🛡️ <b>防刷限流保护已生效</b>：内置数据指纹去重与 20 秒静默防抖合并，杜绝 GitHub API 403 频率超限。若曾触发 GitHub 限制，通常 10~30 分钟窗口重置后自动恢复；急需跨端请用下方【方式二：进度码】秒传。
+          </div>
         </div>
       </div>
 
@@ -2025,7 +2029,6 @@ function saveCurrentPosition() {
     filter: currentFilter,
     topic: currentTopic
   }));
-  scheduleAutoCloudSync();
 }
 
 function restorePositionForCurrentView() {
@@ -2236,6 +2239,7 @@ function saveState() {
   localStorage.setItem('wx_km1_wrongs', JSON.stringify(wrongList));
   localStorage.setItem('wx_km1_killed', JSON.stringify(killedList));
   updateCounts();
+  hasUnsyncedChanges = true;
   scheduleAutoCloudSync();
 }
 
@@ -2247,18 +2251,39 @@ let ghToken = localStorage.getItem('wx_km1_gh_token') || '';
 let ghGistId = localStorage.getItem('wx_km1_gist_id') || '';
 let autoSyncTimer = null;
 let isSyncingCloud = false;
+let hasUnsyncedChanges = false;
+let lastSyncedDataHash = localStorage.getItem('wx_km1_synced_hash') || '';
+let lastPushTimestamp = 0;
+let rateLimitBlockedUntil = 0;
+let isApplyingRemoteSync = false;
+
+// Minimum interval between automatic background cloud pushes (throttle): 25 seconds
+const MIN_AUTO_PUSH_INTERVAL_MS = 25000;
+// Debounce idle time before firing auto-push: 20 seconds
+const AUTO_SYNC_DEBOUNCE_MS = 20000;
 
 function updateSyncBadges(text, isOk = true) {
   const topTxt = document.getElementById('syncTopText');
   const moyuBtn = document.getElementById('moyuSyncBtn');
   const modalMsg = document.getElementById('cloudSyncStatusMsg');
   if (topTxt) topTxt.innerText = text;
-  if (moyuBtn) moyuBtn.innerText = text === '已同步' ? '[Synced]' : (text === '同步中..' ? '[Sync...]' : '[Sync]');
+  if (moyuBtn) moyuBtn.innerText = text === '已同步' ? '[Synced]' : (text.includes('频率') || text.includes('限流') ? '[RateLimit]' : (text === '同步中..' ? '[Sync...]' : '[Sync]'));
   if (modalMsg) {
     modalMsg.style.color = isOk ? '#059669' : '#dc2626';
     const doneCnt = Object.keys(userHistory).length;
     modalMsg.innerText = `状态：${text}（本地已做 ${doneCnt} 题｜错题 ${wrongList.length}｜已斩 ${killedList.length}）${ghGistId ? '｜Gist: ' + ghGistId.slice(0, 8) + '...' : ''}`;
   }
+}
+
+function getSyncDataSignature(payload) {
+  return JSON.stringify({
+    hist: payload.userHistory || {},
+    wb: payload.wrongBookHistory || {},
+    w: payload.wrongList || [],
+    k: payload.killedList || [],
+    p: payload.savedPositions || {},
+    lv: payload.savedLastView || {}
+  });
 }
 
 function buildSyncPayload() {
@@ -2273,6 +2298,45 @@ function buildSyncPayload() {
     savedPositions,
     savedLastView: { filter: currentFilter, topic: currentTopic }
   };
+}
+
+async function parseGitHubResponseError(res) {
+  let errJson = null;
+  try {
+    errJson = await res.json();
+  } catch (e) {}
+
+  const status = res.status;
+  const msg = errJson && errJson.message ? errJson.message : '';
+  const resetHeader = res.headers ? res.headers.get('x-ratelimit-reset') : null;
+
+  if (status === 403 || status === 429) {
+    let waitMinutes = 15;
+    if (resetHeader) {
+      const resetTs = parseInt(resetHeader, 10) * 1000;
+      if (resetTs > Date.now()) {
+        rateLimitBlockedUntil = resetTs;
+        waitMinutes = Math.max(1, Math.ceil((resetTs - Date.now()) / 60000));
+      } else {
+        rateLimitBlockedUntil = Date.now() + 15 * 60 * 1000;
+      }
+    } else {
+      rateLimitBlockedUntil = Date.now() + 15 * 60 * 1000;
+    }
+    const tip = `GitHub API 访问频率超限 (HTTP ${status})。GitHub 防刷保护已生效，预计将在 ${waitMinutes} 分钟后恢复。
+💡 本地刷题记录 100% 完好保存在当前浏览器中！急需跨端请用【方式二：免配置进度码】一键秒传。`;
+    return { isRateLimit: true, waitMinutes, message: tip };
+  }
+
+  if (status === 401) {
+    return { isAuth: true, message: 'GitHub Token 无效或已过期 (401)，请检查 Token 是否具备 gist 权限。' };
+  }
+
+  if (status === 404) {
+    return { isNotFound: true, message: '未找到指定的 Gist 或 Token 无权访问 (404)。' };
+  }
+
+  return { message: (msg ? `${msg} (${status})` : `请求失败 (${status})`) };
 }
 
 function applySyncPayload(remote, mode = 'merge') {
@@ -2339,7 +2403,10 @@ async function ensureGistId(token) {
   };
   // 1. Search existing gists for GIST_FILENAME
   const res = await fetch('https://api.github.com/gists?per_page=100', { headers });
-  if (!res.ok) throw new Error('GitHub Token 验证失败 (' + res.status + ')');
+  if (!res.ok) {
+    const errInfo = await parseGitHubResponseError(res);
+    throw new Error(errInfo.message);
+  }
   const gists = await res.json();
   const found = gists.find(g => g.files && g.files[GIST_FILENAME]);
   if (found) {
@@ -2350,6 +2417,7 @@ async function ensureGistId(token) {
     return ghGistId;
   }
   // 2. Create a new secret Gist if none exists
+  const payload = buildSyncPayload();
   const createRes = await fetch('https://api.github.com/gists', {
     method: 'POST',
     headers: { ...headers, 'Content-Type': 'application/json' },
@@ -2358,15 +2426,21 @@ async function ensureGistId(token) {
       public: false,
       files: {
         [GIST_FILENAME]: {
-          content: JSON.stringify(buildSyncPayload(), null, 2)
+          content: JSON.stringify(payload, null, 2)
         }
       }
     })
   });
-  if (!createRes.ok) throw new Error('创建云端 Gist 失败 (' + createRes.status + ')');
+  if (!createRes.ok) {
+    const errInfo = await parseGitHubResponseError(createRes);
+    throw new Error(errInfo.message);
+  }
   const created = await createRes.json();
   ghGistId = created.id;
   localStorage.setItem('wx_km1_gist_id', ghGistId);
+  lastSyncedDataHash = getSyncDataSignature(payload);
+  localStorage.setItem('wx_km1_synced_hash', lastSyncedDataHash);
+  hasUnsyncedChanges = false;
   const gidInput = document.getElementById('ghGistIdInput');
   if (gidInput) gidInput.value = ghGistId;
   return ghGistId;
@@ -2374,11 +2448,44 @@ async function ensureGistId(token) {
 
 async function pushToCloud(silent = false) {
   if (!ghToken || isSyncingCloud) return;
+
+  if (rateLimitBlockedUntil && Date.now() < rateLimitBlockedUntil) {
+    const waitMins = Math.max(1, Math.ceil((rateLimitBlockedUntil - Date.now()) / 60000));
+    updateSyncBadges(`频率受限(${waitMins}分)`, false);
+    if (!silent) {
+      alert(`⏳ GitHub API 频率限制生效中（还需约 ${waitMins} 分钟恢复）。\n\n期间本地刷题与错题记录均安全保存在浏览器中，恢复后将自动继续同步！\n急需同步可用【方式二：免配置进度码】秒传。`);
+    }
+    return;
+  }
+
+  const payload = buildSyncPayload();
+  const currentSig = getSyncDataSignature(payload);
+
+  // If data hasn't changed since last sync and silent auto-push, skip network request entirely!
+  if (silent && currentSig === lastSyncedDataHash) {
+    updateSyncBadges('已同步', true);
+    hasUnsyncedChanges = false;
+    return;
+  }
+
+  // Throttle check for background auto-push
+  const now = Date.now();
+  if (silent && (now - lastPushTimestamp < MIN_AUTO_PUSH_INTERVAL_MS)) {
+    scheduleAutoCloudSync(MIN_AUTO_PUSH_INTERVAL_MS - (now - lastPushTimestamp) + 1000);
+    return;
+  }
+
   try {
     isSyncingCloud = true;
     updateSyncBadges('同步中..');
     const gistId = await ensureGistId(ghToken);
-    const payload = buildSyncPayload();
+
+    if (currentSig === lastSyncedDataHash && silent) {
+      updateSyncBadges('已同步', true);
+      hasUnsyncedChanges = false;
+      return;
+    }
+
     localStorage.setItem('wx_km1_last_ts', String(payload.updatedAt));
     const res = await fetch(`https://api.github.com/gists/${gistId}`, {
       method: 'PATCH',
@@ -2395,11 +2502,21 @@ async function pushToCloud(silent = false) {
         }
       })
     });
-    if (!res.ok) throw new Error('上传失败 (' + res.status + ')');
+
+    if (!res.ok) {
+      const errInfo = await parseGitHubResponseError(res);
+      throw new Error(errInfo.message);
+    }
+
+    lastSyncedDataHash = currentSig;
+    localStorage.setItem('wx_km1_synced_hash', lastSyncedDataHash);
+    hasUnsyncedChanges = false;
+    lastPushTimestamp = Date.now();
+    rateLimitBlockedUntil = 0;
     updateSyncBadges('已同步', true);
     if (!silent) alert('✅ 本地进度已成功同步到 GitHub 私有云 Gist！');
   } catch (err) {
-    updateSyncBadges('同步失败', false);
+    updateSyncBadges(rateLimitBlockedUntil ? '频率超限' : '同步失败', false);
     if (!silent) alert('❌ 云同步失败：' + err.message);
   } finally {
     isSyncingCloud = false;
@@ -2408,6 +2525,16 @@ async function pushToCloud(silent = false) {
 
 async function pullFromCloud(mode = 'merge', silent = false) {
   if (!ghToken || isSyncingCloud) return;
+
+  if (rateLimitBlockedUntil && Date.now() < rateLimitBlockedUntil) {
+    const waitMins = Math.max(1, Math.ceil((rateLimitBlockedUntil - Date.now()) / 60000));
+    updateSyncBadges(`频率受限(${waitMins}分)`, false);
+    if (!silent) {
+      alert(`⏳ GitHub API 频率限制生效中（还需约 ${waitMins} 分钟恢复）。\n\n急需同步可用【方式二：免配置进度码】秒传。`);
+    }
+    return;
+  }
+
   try {
     isSyncingCloud = true;
     updateSyncBadges('同步中..');
@@ -2418,44 +2545,104 @@ async function pullFromCloud(mode = 'merge', silent = false) {
         'Accept': 'application/vnd.github+json'
       }
     });
-    if (!res.ok) throw new Error('拉取云端 Gist 失败 (' + res.status + ')');
+
+    if (!res.ok) {
+      const errInfo = await parseGitHubResponseError(res);
+      throw new Error(errInfo.message);
+    }
+
     const data = await res.json();
     const fileObj = data.files && data.files[GIST_FILENAME];
+    let hadRemoteData = false;
+    let localHadNewerChanges = false;
+
     if (fileObj && fileObj.content) {
+      hadRemoteData = true;
       const remotePayload = JSON.parse(fileObj.content);
-      applySyncPayload(remotePayload, mode);
+
+      if (mode === 'merge') {
+        const remoteHist = remotePayload.userHistory || {};
+        for (const qid of Object.keys(userHistory)) {
+          if (!remoteHist[qid]) {
+            localHadNewerChanges = true;
+            break;
+          }
+        }
+      }
+
+      isApplyingRemoteSync = true;
+      try {
+        applySyncPayload(remotePayload, mode);
+      } finally {
+        isApplyingRemoteSync = false;
+      }
+
+      const mergedPayload = buildSyncPayload();
+      lastSyncedDataHash = getSyncDataSignature(mergedPayload);
+      localStorage.setItem('wx_km1_synced_hash', lastSyncedDataHash);
     }
+
+    rateLimitBlockedUntil = 0;
     isSyncingCloud = false;
-    if (mode === 'merge') {
-      await pushToCloud(true);
+
+    if (mode === 'merge' && localHadNewerChanges) {
+      hasUnsyncedChanges = true;
+      scheduleAutoCloudSync(AUTO_SYNC_DEBOUNCE_MS);
+      updateSyncBadges('已合并', true);
     } else {
+      hasUnsyncedChanges = false;
       updateSyncBadges('已同步', true);
     }
-    if (!silent) alert('✅ 已从云端同步最新刷题进度！');
+
+    if (!silent) {
+      alert(hadRemoteData ? '✅ 已从云端同步最新刷题进度！' : 'ℹ️ 云端暂无备份文件。');
+    }
   } catch (err) {
     isSyncingCloud = false;
-    updateSyncBadges('同步失败', false);
+    updateSyncBadges(rateLimitBlockedUntil ? '频率超限' : '同步失败', false);
     if (!silent) alert('❌ 拉取云端进度失败：' + err.message);
   }
 }
 
-function scheduleAutoCloudSync() {
-  if (!ghToken) return;
+function scheduleAutoCloudSync(delayMs = AUTO_SYNC_DEBOUNCE_MS) {
+  if (!ghToken || isApplyingRemoteSync) return;
   if (autoSyncTimer) clearTimeout(autoSyncTimer);
   autoSyncTimer = setTimeout(() => {
     pushToCloud(true);
-  }, 1800);
+  }, delayMs);
 }
 
 function openSyncModal() {
   document.getElementById('ghTokenInput').value = ghToken;
   document.getElementById('ghGistIdInput').value = ghGistId;
-  updateSyncBadges(ghToken ? '已配置' : '云同步', true);
+  if (rateLimitBlockedUntil && Date.now() < rateLimitBlockedUntil) {
+    const waitMins = Math.max(1, Math.ceil((rateLimitBlockedUntil - Date.now()) / 60000));
+    updateSyncBadges(`频率受限(${waitMins}分恢复)`, false);
+  } else {
+    updateSyncBadges(ghToken ? '已配置' : '云同步', true);
+  }
   document.getElementById('syncModal').style.display = 'flex';
 }
 
 function closeSyncModal() {
   document.getElementById('syncModal').style.display = 'none';
+}
+
+function clearCloudToken() {
+  if (!confirm('确定要清除已保存的 GitHub Token 和云同步配置吗？\n（本地已做的题目和错题记录绝不会被删除）')) return;
+  ghToken = '';
+  ghGistId = '';
+  lastSyncedDataHash = '';
+  rateLimitBlockedUntil = 0;
+  hasUnsyncedChanges = false;
+  if (autoSyncTimer) clearTimeout(autoSyncTimer);
+  localStorage.removeItem('wx_km1_gh_token');
+  localStorage.removeItem('wx_km1_gist_id');
+  localStorage.removeItem('wx_km1_synced_hash');
+  document.getElementById('ghTokenInput').value = '';
+  document.getElementById('ghGistIdInput').value = '';
+  updateSyncBadges('云同步', true);
+  alert('已清除 GitHub 云同步配置。');
 }
 
 async function saveAndSyncCloud(action) {
@@ -2478,6 +2665,17 @@ async function saveAndSyncCloud(action) {
     await pullFromCloud('merge', false);
   }
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && hasUnsyncedChanges && ghToken && !isSyncingCloud) {
+    pushToCloud(true);
+  }
+});
+window.addEventListener('beforeunload', () => {
+  if (hasUnsyncedChanges && ghToken && !isSyncingCloud) {
+    pushToCloud(true);
+  }
+});
 
 function copyProgressCode() {
   const payload = buildSyncPayload();
