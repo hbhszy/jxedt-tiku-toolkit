@@ -195,10 +195,6 @@
   }
   .chip-done {
     font-weight: 600;
-    opacity: 0.85;
-  }
-  .chip-undone {
-    opacity: 0.7;
   }
 
   /* Exam Banner */
@@ -1106,7 +1102,9 @@
   }
   body.moyu-active.moyu-code .filter-chip.active {
     color: #9cdcfe !important;
-    border-bottom-color: #569cd6 !important;
+    background: rgba(56, 139, 253, 0.14) !important;
+    border-color: rgba(86, 156, 214, 0.45) !important;
+    border-bottom: 2px solid #569cd6 !important;
   }
   body.moyu-active.moyu-code .card {
     background: transparent;
@@ -1614,7 +1612,7 @@
       <div class="filter-chip" data-filter="special" onclick="setFilter('special', this)">🔤 缩写/新规 (<span class="chip-done" id="done-special">0</span>/<span id="tot-special">27</span>)</div>
       <div class="filter-chip" data-filter="highErr" onclick="setFilter('highErr', this)">⚡ 杀手题≥35% (<span class="chip-done" id="done-highErr">0</span>/<span id="tot-highErr">253</span>)</div>
       <div class="filter-chip" data-filter="wrongBook" onclick="setFilter('wrongBook', this)">❌ 错题本 (<span id="wrongCountBadge">0</span>)</div>
-      <div class="filter-chip" data-filter="hasMedia" onclick="setFilter('hasMedia', this)">🖼️ 带图题 (346)</div>
+      <div class="filter-chip" data-filter="hasMedia" onclick="setFilter('hasMedia', this)">🖼️ 带图题 (<span class="chip-done" id="done-hasMedia">0</span>/<span id="tot-hasMedia">346</span>)</div>
       <div class="filter-chip" data-filter="killedBook" onclick="setFilter('killedBook', this)">✂️ 已斩 (<span id="killedChipCount">0</span>)</div>
       <div class="filter-chip" data-filter="all" onclick="setFilter('all', this)">📚 全库 (<span class="chip-done" id="done-all">0</span>/<span id="tot-all">805</span>)</div>
     </div>
@@ -1635,13 +1633,13 @@
         </div>
       </div>
       <div class="filter-row" id="topicFilters">
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('记分扣分', this)">🔢 记分扣分 (<span class="chip-done" id="done-topic-记分扣分">0</span>/<span id="tot-topic-记分扣分">109</span>)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('标志标线', this)">🚸 标志标线 (<span class="chip-done" id="done-topic-标志标线">0</span>/<span id="tot-topic-标志标线">213</span>)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('车速限速', this)">🚗 车速限速 (<span class="chip-done" id="done-topic-车速限速">0</span>/<span id="tot-topic-车速限速">65</span>)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('距离与时间', this)">📏 距离与时间 (<span class="chip-done" id="done-topic-距离与时间">0</span>/<span id="tot-topic-距离与时间">68</span>)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('交警手势与信号', this)">👮 交警手势 (<span class="chip-done" id="done-topic-交警手势与信号">0</span>/<span id="tot-topic-交警手势与信号">58</span>)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('罚款与刑期', this)">⚖️ 罚款刑期 (<span class="chip-done" id="done-topic-罚款与刑期">0</span>/<span id="tot-topic-罚款与刑期">53</span>)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('安全常识与应急', this)">🛡️ 规则与应急 (<span class="chip-done" id="done-topic-安全常识与应急">0</span>/<span id="tot-topic-安全常识与应急">239</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="记分扣分" onclick="setTopicFilter('记分扣分', this)">🔢 记分扣分 (<span class="chip-done" id="done-topic-记分扣分">0</span>/<span id="tot-topic-记分扣分">109</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="标志标线" onclick="setTopicFilter('标志标线', this)">🚸 标志标线 (<span class="chip-done" id="done-topic-标志标线">0</span>/<span id="tot-topic-标志标线">213</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="车速限速" onclick="setTopicFilter('车速限速', this)">🚗 车速限速 (<span class="chip-done" id="done-topic-车速限速">0</span>/<span id="tot-topic-车速限速">65</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="距离与时间" onclick="setTopicFilter('距离与时间', this)">📏 距离与时间 (<span class="chip-done" id="done-topic-距离与时间">0</span>/<span id="tot-topic-距离与时间">68</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="交警手势与信号" onclick="setTopicFilter('交警手势与信号', this)">👮 交警手势 (<span class="chip-done" id="done-topic-交警手势与信号">0</span>/<span id="tot-topic-交警手势与信号">58</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="罚款与刑期" onclick="setTopicFilter('罚款与刑期', this)">⚖️ 罚款刑期 (<span class="chip-done" id="done-topic-罚款与刑期">0</span>/<span id="tot-topic-罚款与刑期">53</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="安全常识与应急" onclick="setTopicFilter('安全常识与应急', this)">🛡️ 规则与应急 (<span class="chip-done" id="done-topic-安全常识与应急">0</span>/<span id="tot-topic-安全常识与应急">239</span>)</div>
       </div>
     </div>
   </div>
@@ -2385,9 +2383,8 @@ function applySyncPayload(remote, mode = 'merge') {
     if (savedLastView.topic) {
       currentTopic = savedLastView.topic;
       clearFilterActiveStates();
-      document.querySelectorAll('#topicFilters .filter-chip').forEach(el => {
-        if (el.innerText.includes(currentTopic)) el.classList.add('active');
-      });
+      const tChip = document.querySelector(`#topicFilters .filter-chip[data-topic="${currentTopic}"]`);
+      if (tChip) tChip.classList.add('active');
     } else if (savedLastView.filter) {
       currentFilter = savedLastView.filter;
       currentTopic = null;
@@ -2817,6 +2814,7 @@ function updateCounts() {
       ['local', q => q.scope !== '全国通用题'],
       ['special', q => q.is_special],
       ['highErr', q => q.err_num >= 35.0],
+      ['hasMedia', q => q.img && q.img.trim()],
       ['all', () => true]
     ];
     filterDefs.forEach(([key, pred]) => {
@@ -2827,12 +2825,8 @@ function updateCounts() {
       if (dEl) dEl.innerText = done;
       if (tEl) tEl.innerText = pool.length;
     });
-    const topicNorm = {};
-    document.querySelectorAll('#topicFilters .filter-chip').forEach(el => {
-      const m = el.getAttribute('onclick') && el.getAttribute('onclick').match(/setTopicFilter\('([^']+)'/);
-      if (m) topicNorm[m[1]] = el;
-    });
-    Object.keys(topicNorm).forEach(cat => {
+    document.querySelectorAll('#topicFilters .filter-chip[data-topic]').forEach(el => {
+      const cat = el.getAttribute('data-topic');
       const pool = RAW_QUESTIONS.filter(q => q.cat === cat && (!hideKilled || !killedList.includes(q.id)));
       const done = pool.filter(q => userHistory[q.id]).length;
       const dEl = document.getElementById('done-topic-' + cat);
@@ -3626,9 +3620,8 @@ if (savedLastView) {
   if (savedLastView.topic) {
     currentTopic = savedLastView.topic;
     clearFilterActiveStates();
-    document.querySelectorAll('#topicFilters .filter-chip').forEach(el => {
-      if (el.innerText.includes(currentTopic)) el.classList.add('active');
-    });
+    const tChip = document.querySelector(`#topicFilters .filter-chip[data-topic="${currentTopic}"]`);
+    if (tChip) tChip.classList.add('active');
   } else if (savedLastView.filter) {
     // Only restore wrongBook/killedBook if non-empty
     if ((savedLastView.filter === 'wrongBook' && wrongList.length === 0) ||
