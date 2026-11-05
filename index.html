@@ -1608,26 +1608,26 @@
       <button class="btn btn-outline" id="syncTopBtn" onclick="openSyncModal()" title="跨电脑/手机云端同步刷题进度">
         ☁️ <span id="syncTopText">云同步</span>
       </button>
-      <button class="btn btn-exam" id="examBtn" onclick="startMockExam()">
+      <button class="btn btn-exam" id="examBtn" onclick="startMockExam()" title="开启全真100题模拟考试（45分钟限时，90分及格）">
         🎯 模考
       </button>
       <button class="btn btn-outline" id="examHistBtn" onclick="openMockHistoryModal()" title="查看历次模拟考成绩单与错题复盘">
         📊 <span id="examHistBtnText">模考记录</span>(<span id="mockHistCount">0</span>)
       </button>
-      <button class="btn btn-cheat" onclick="openCheatSheet()">
+      <button class="btn btn-cheat" onclick="openCheatSheet()" title="打开考前高频秒杀口诀速查表">
         📖 口诀
       </button>
-      <button class="btn btn-outline" id="modeBtn" onclick="toggleMode()">
+      <button class="btn btn-outline" id="modeBtn" onclick="toggleMode()" title="切换做题模式与背题模式（直接显示答案与解析）">
         <span id="modeIcon">👁️</span> <span id="modeText">背题</span>
       </button>
-      <button class="btn btn-filter-toggle" id="mobileFilterToggleBtn" onclick="toggleMobileDrawer()">
+      <button class="btn btn-filter-toggle" id="mobileFilterToggleBtn" onclick="toggleMobileDrawer()" title="展开或收起考点专项分类与开关设置">
         🎛️ 专项/设置
       </button>
-      <button class="btn btn-outline hide-on-mobile" onclick="openSheet()">
+      <button class="btn btn-outline hide-on-mobile" onclick="openSheet()" title="打开答题卡网格，查看对错状态或快速跳题">
         📋 答题卡 (<span id="doneCount">0</span>/<span id="totalFilterCount">376</span>)
       </button>
       <button class="btn btn-outline hide-on-mobile" onclick="exportWrongs()" title="导出我的错题列表备份">📥 导出错题</button>
-      <button class="btn btn-danger-outline hide-on-mobile" onclick="clearProgress()">重置记录</button>
+      <button class="btn btn-danger-outline hide-on-mobile" onclick="clearProgress()" title="清空全部做题记录、错题本、模考成绩与已斩题">重置记录</button>
     </div>
   </div>
 
@@ -1676,14 +1676,14 @@
   <!-- Mock Exam Status Banner -->
   <div class="exam-banner" id="examBanner">
     <div>
-      <strong id="examBannerTitle">🎯 全真模考（100题 / 90分及格）</strong>
-      <div style="font-size:0.8rem; opacity:0.92; margin-top:2px;" id="examLiveStat">已答 0/100 ｜ 对 0 ｜ 错 0 (错11题挂科)</div>
+      <strong id="examBannerTitle" title="全真模拟考试：共100题，限时45分钟，90分及格">🎯 全真模考（100题 / 90分及格）</strong>
+      <div style="font-size:0.8rem; opacity:0.92; margin-top:2px;" id="examLiveStat" title="当前模考已答、答对与答错题数统计（错11题即不及格）">已答 0/100 ｜ 对 0 ｜ 错 0 (错11题挂科)</div>
     </div>
     <div style="display:flex; align-items:center; gap:6px;">
-      <span class="exam-timer" id="examTimerText">45:00</span>
-      <button class="btn btn-outline" id="examHistBannerBtn" style="color:#1f2937;" onclick="openMockHistoryModal()">历史成绩</button>
-      <button class="btn btn-primary" id="examSubmitBtn" onclick="submitMockExam()">交卷</button>
-      <button class="btn btn-outline" id="examExitBtn" style="color:#1f2937;" onclick="exitMockExam()">退出</button>
+      <span class="exam-timer" id="examTimerText" title="本场模拟考剩余倒计时（45分钟到自动交卷）">45:00</span>
+      <button class="btn btn-outline" id="examHistBannerBtn" style="color:#1f2937;" onclick="openMockHistoryModal()" title="查看历次模拟考历史成绩单与错题复盘">历史成绩</button>
+      <button class="btn btn-primary" id="examSubmitBtn" onclick="submitMockExam()" title="立即交卷并生成本场模拟考成绩单">交卷</button>
+      <button class="btn btn-outline" id="examExitBtn" style="color:#1f2937;" onclick="exitMockExam()" title="放弃并退出当前模拟考试">退出</button>
     </div>
   </div>
 
@@ -1757,7 +1757,7 @@
     <div class="options" id="optionsBox"></div>
 
     <div class="multi-submit-bar" id="multiSubmitBar">
-      <button class="btn btn-primary" id="multiSubmitBtn" onclick="submitMultiChoice()" style="width:100%; justify-content:center; padding:11px; font-size:0.95rem;">
+      <button class="btn btn-primary" id="multiSubmitBtn" onclick="submitMultiChoice()" title="确认提交当前多选题所选答案（快捷键 Enter）" style="width:100%; justify-content:center; padding:11px; font-size:0.95rem;">
         ✅ 确认提交多选答案
       </button>
     </div>
@@ -1792,11 +1792,11 @@
 
   <!-- Desktop Nav Bar -->
   <div class="nav-bar">
-    <button class="btn btn-outline" id="prevBtn" onclick="prevQ()">⬅️ 上一题 (←)</button>
-    <div style="font-size:0.85rem; color:var(--text-muted);" id="statInfo">
+    <button class="btn btn-outline" id="prevBtn" onclick="prevQ()" title="切换到上一题（快捷键 ←）">⬅️ 上一题 (←)</button>
+    <div style="font-size:0.85rem; color:var(--text-muted);" id="statInfo" title="当前题库分类下的已答题数与正确率">
       当前列表已答: 0 ｜ 正确率: 0%
     </div>
-    <button class="btn btn-primary" id="nextBtn" onclick="nextQ()">下一题 (→ / 空格) ➡️</button>
+    <button class="btn btn-primary" id="nextBtn" onclick="nextQ()" title="切换到下一题（快捷键 → 或 空格）">下一题 (→ / 空格) ➡️</button>
   </div>
 
   <!-- Fake TypeScript Code Context (Bottom Camouflage in Code Skin) -->
@@ -2015,10 +2015,10 @@
 <div class="modal-overlay" id="mockHistoryModal" onclick="closeMockHistoryModal()">
   <div class="modal" style="max-width:650px;" onclick="event.stopPropagation()">
     <div class="modal-header">
-      <span id="mockHistModalTitle">📊 模拟考历史成绩单与错题复盘</span>
+      <span id="mockHistModalTitle" title="模拟考历史成绩单与本场错题复盘">📊 模拟考历史成绩单与错题复盘</span>
       <div style="display:flex; gap:6px; align-items:center;">
-        <button class="btn btn-danger-outline" id="clearMockHistBtn" style="padding:2px 8px; font-size:0.76rem;" onclick="clearMockExamHistory()">清空记录</button>
-        <button class="btn btn-outline" style="padding:2px 8px;" onclick="closeMockHistoryModal()">✕</button>
+        <button class="btn btn-danger-outline" id="clearMockHistBtn" style="padding:2px 8px; font-size:0.76rem;" onclick="clearMockExamHistory()" title="清空全部模拟考历史成绩单（不影响刷题进度与错题本）">清空记录</button>
+        <button class="btn btn-outline" style="padding:2px 8px;" onclick="closeMockHistoryModal()" title="关闭成绩单弹窗（快捷键 Esc）">✕</button>
       </div>
     </div>
     <div class="modal-body" id="mockHistoryModalBody" style="font-size:0.85rem; line-height:1.5;">
@@ -3711,14 +3711,14 @@ function openMockHistoryModal(highlightExamId = null) {
 
       html += `
         <div style="background:${passBg}; border:1px solid ${passBorder}; color:${passColor}; border-radius:8px; padding:12px; margin-bottom:14px;">
-          <div style="font-size:0.95rem; font-weight:700; margin-bottom:4px;">${titleTxt}</div>
-          <div style="font-size:0.8rem; margin-bottom:10px;">${detailTxt}</div>
+          <div style="font-size:0.95rem; font-weight:700; margin-bottom:4px;" title="本场模拟考最终得分：${cur.score}分（90分及格）">${titleTxt}</div>
+          <div style="font-size:0.8rem; margin-bottom:10px;" title="答对 ${cur.correct} 题 ｜ 答错 ${cur.wrong} 题 ｜ 未答 ${cur.unanswered} 题 ｜ 耗时 ${formatDurationMMSS(cur.durationSec)}">${detailTxt}</div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             ${cur.wrongIds && cur.wrongIds.length > 0
-              ? `<button class="btn btn-primary" onclick="reviewMockExamWrongs('${cur.id}')">${isMoyuMode ? 'Inspect Fails (' + cur.wrongIds.length + ')' : '📕 立即复盘本场错题 (' + cur.wrongIds.length + '题)'}</button>`
+              ? `<button class="btn btn-primary" onclick="reviewMockExamWrongs('${cur.id}')" title="立即切换题库，逐题复盘本场做错的 ${cur.wrongIds.length} 道题">${isMoyuMode ? 'Inspect Fails (' + cur.wrongIds.length + ')' : '📕 立即复盘本场错题 (' + cur.wrongIds.length + '题)'}</button>`
               : ''}
-            <button class="btn btn-exam" onclick="closeMockHistoryModal(); startMockExam();">${isMoyuMode ? 'Re-run Suite' : '🔄 再考一场'}</button>
-            <button class="btn btn-outline" onclick="closeMockHistoryModal();">${isMoyuMode ? 'Close' : '关闭'}</button>
+            <button class="btn btn-exam" onclick="closeMockHistoryModal(); startMockExam();" title="重新随机抽取 100 道题开启新一轮模拟考">${isMoyuMode ? 'Re-run Suite' : '🔄 再考一场'}</button>
+            <button class="btn btn-outline" onclick="closeMockHistoryModal();" title="关闭成绩单弹窗">${isMoyuMode ? 'Close' : '关闭'}</button>
           </div>
         </div>
       `;
@@ -3729,7 +3729,7 @@ function openMockHistoryModal(highlightExamId = null) {
     html += `
       <div style="text-align:center; padding:28px 12px; color:#64748b;">
         <div style="font-size:0.92rem; margin-bottom:12px;">${isMoyuMode ? 'No benchmark execution logs recorded yet.' : '暂无已交卷的模拟考历史记录。每场模考交卷后会自动在此保存成绩单与错题快照！'}</div>
-        <button class="btn btn-exam" onclick="closeMockHistoryModal(); startMockExam();">${isMoyuMode ? '[Run Benchmark Suite]' : '🎯 立即开启一场全真模考'}</button>
+        <button class="btn btn-exam" onclick="closeMockHistoryModal(); startMockExam();" title="随机抽取 100 道题开启 45 分钟全真模拟考试">${isMoyuMode ? '[Run Benchmark Suite]' : '🎯 立即开启一场全真模考'}</button>
       </div>
     `;
   } else {
@@ -3741,19 +3741,19 @@ function openMockHistoryModal(highlightExamId = null) {
 
     html += `
       <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:12px; text-align:center;">
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 4px;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 4px;" title="累计已交卷的模拟考总场次">
           <div style="font-size:0.72rem; color:#64748b;">${isMoyuMode ? 'Runs' : '累计模考'}</div>
           <div style="font-size:1rem; font-weight:700; color:#1e293b;">${totalRuns}${isMoyuMode ? '' : ' 场'}</div>
         </div>
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 4px;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 4px;" title="得分 ≥90 分的合格场次与总及格率">
           <div style="font-size:0.72rem; color:#64748b;">${isMoyuMode ? 'Pass Rate' : '合格场次'}</div>
           <div style="font-size:1rem; font-weight:700; color:#059669;">${passRuns} (${passRate}%)</div>
         </div>
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 4px;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 4px;" title="历史模拟考最高得分">
           <div style="font-size:0.72rem; color:#64748b;">${isMoyuMode ? 'Best' : '最高得分'}</div>
           <div style="font-size:1rem; font-weight:700; color:#2563eb;">${maxScore}${isMoyuMode ? '' : ' 分'}</div>
         </div>
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 4px;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 4px;" title="历次模拟考平均得分">
           <div style="font-size:0.72rem; color:#64748b;">${isMoyuMode ? 'Average' : '平均得分'}</div>
           <div style="font-size:1rem; font-weight:700; color:#334155;">${avgScore}${isMoyuMode ? '' : ' 分'}</div>
         </div>
@@ -3762,12 +3762,12 @@ function openMockHistoryModal(highlightExamId = null) {
         <table class="cheat-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>${isMoyuMode ? 'Timestamp' : '交卷时间'}</th>
-              <th>${isMoyuMode ? 'Score' : '得分 / 状态'}</th>
-              <th>${isMoyuMode ? 'P / F / S' : '对 / 错 / 未答'}</th>
-              <th>${isMoyuMode ? 'Time' : '用时'}</th>
-              <th>${isMoyuMode ? 'Action' : '本场错题复盘'}</th>
+              <th title="模考场次序号">#</th>
+              <th title="交卷时间">${isMoyuMode ? 'Timestamp' : '交卷时间'}</th>
+              <th title="本场得分与是否合格（90分及格）">${isMoyuMode ? 'Score' : '得分 / 状态'}</th>
+              <th title="答对 (Pass) / 答错 (Fail) / 未答 (Skip) 题数">${isMoyuMode ? 'P / F / S' : '对 / 错 / 未答'}</th>
+              <th title="本场考试用时">${isMoyuMode ? 'Time' : '用时'}</th>
+              <th title="回看本场错题或删除单条记录">${isMoyuMode ? 'Action' : '本场错题复盘'}</th>
             </tr>
           </thead>
           <tbody>
@@ -3777,22 +3777,22 @@ function openMockHistoryModal(highlightExamId = null) {
       const seqNum = totalRuns - idx;
       const wCnt = Array.isArray(r.wrongIds) ? r.wrongIds.length : (r.wrong || 0);
       const scoreBadge = r.passed
-        ? `<span style="color:#059669; font-weight:700;">${r.score}${isMoyuMode ? ' [PASS]' : '分 合格'}</span>`
-        : `<span style="color:#dc2626; font-weight:700;">${r.score}${isMoyuMode ? ' [FAIL]' : '分 未过'}</span>`;
+        ? `<span style="color:#059669; font-weight:700;" title="${r.score}分（合格）">${r.score}${isMoyuMode ? ' [PASS]' : '分 合格'}</span>`
+        : `<span style="color:#dc2626; font-weight:700;" title="${r.score}分（未及格，差 ${90 - (r.score || 0)} 分）">${r.score}${isMoyuMode ? ' [FAIL]' : '分 未过'}</span>`;
       const isHighlighted = highlightExamId && r.id === highlightExamId;
       html += `
         <tr style="${isHighlighted ? 'background:#eff6ff;' : ''}">
-          <td>#${seqNum}</td>
-          <td style="white-space:nowrap; font-size:0.76rem;">${r.timeStr || '-'}</td>
+          <td title="第 ${seqNum} 场模拟考">#${seqNum}</td>
+          <td style="white-space:nowrap; font-size:0.76rem;" title="交卷时间：${r.timeStr || '-'}">${r.timeStr || '-'}</td>
           <td style="white-space:nowrap;">${scoreBadge}</td>
-          <td style="white-space:nowrap;">${r.correct ?? 0} / <span style="color:#dc2626;">${r.wrong ?? 0}</span> / ${r.unanswered ?? 0}</td>
-          <td style="white-space:nowrap;">${formatDurationMMSS(r.durationSec || 0)}</td>
+          <td style="white-space:nowrap;" title="答对 ${r.correct ?? 0} 题 / 答错 ${r.wrong ?? 0} 题 / 未答 ${r.unanswered ?? 0} 题">${r.correct ?? 0} / <span style="color:#dc2626;">${r.wrong ?? 0}</span> / ${r.unanswered ?? 0}</td>
+          <td style="white-space:nowrap;" title="本场考试耗时 ${formatDurationMMSS(r.durationSec || 0)}">${formatDurationMMSS(r.durationSec || 0)}</td>
           <td style="white-space:nowrap;">
             <div style="display:flex; gap:4px; align-items:center;">
               ${Array.isArray(r.wrongIds) && r.wrongIds.length > 0
-                ? `<button class="btn btn-outline" style="padding:2px 7px; font-size:0.74rem;" onclick="reviewMockExamWrongs('${r.id}')">${isMoyuMode ? 'Inspect(' + wCnt + ')' : '📖 看错题(' + wCnt + ')'}</button>`
-                : `<span style="color:#059669; font-size:0.74rem;">${isMoyuMode ? '0 Fail' : '✨ 无错题'}</span>`}
-              <button class="btn btn-outline" style="padding:2px 6px; font-size:0.72rem; color:#94a3b8;" title="删除该条记录" onclick="deleteMockHistoryItem('${r.id}')">✕</button>
+                ? `<button class="btn btn-outline" style="padding:2px 7px; font-size:0.74rem;" title="点击复盘第 #${seqNum} 场模考做错的 ${wCnt} 道题" onclick="reviewMockExamWrongs('${r.id}')">${isMoyuMode ? 'Inspect(' + wCnt + ')' : '📖 看错题(' + wCnt + ')'}</button>`
+                : `<span style="color:#059669; font-size:0.74rem;" title="本场无答错题目">${isMoyuMode ? '0 Fail' : '✨ 无错题'}</span>`}
+              <button class="btn btn-outline" style="padding:2px 6px; font-size:0.72rem; color:#94a3b8;" title="删除第 #${seqNum} 场模考记录" onclick="deleteMockHistoryItem('${r.id}')">✕</button>
             </div>
           </td>
         </tr>
