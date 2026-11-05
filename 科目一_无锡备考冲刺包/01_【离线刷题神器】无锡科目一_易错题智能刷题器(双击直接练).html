@@ -713,13 +713,33 @@
     border-radius: 3px;
     padding: 1px 6px;
   }
-  body.moyu-active .wrongbook-banner {
+  body.moyu-active .wrongbook-banner,
+  body.moyu-active .exam-banner {
     background: transparent !important;
-    border-color: #cbd5e1 !important;
+    border: 1px solid #cbd5e1 !important;
     color: #64748b !important;
+    box-shadow: none !important;
     border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 0.76rem;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+  body.moyu-active .exam-banner > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  body.moyu-active #examLiveStat {
+    font-size: 0.75rem !important;
+    margin-top: 0 !important;
+    opacity: 0.85 !important;
+  }
+  body.moyu-active .exam-timer {
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: transparent !important;
+    color: inherit !important;
+    padding: 1px 4px;
   }
   body.moyu-active .kb-hint {
     opacity: 0.45;
@@ -1081,9 +1101,11 @@
     font-size: 11.5px;
     padding: 1px 6px;
   }
-  body.moyu-active.moyu-code .wrongbook-banner {
+  body.moyu-active.moyu-code .wrongbook-banner,
+  body.moyu-active.moyu-code .exam-banner {
     border-color: #2d2d2d !important;
     color: #6e7681 !important;
+    margin: 2px 16px 6px;
   }
   body.moyu-active.moyu-code .badge {
     border-color: #2d2d2d !important;
@@ -1539,6 +1561,7 @@
     <div class="moyu-right-tools">
       <button class="moyu-tool-link" id="moyuSyncBtn" onclick="openSyncModal()" title="跨设备云端同步进度">[Sync]</button>
       <button class="moyu-tool-link" id="toggleHeaderBtn" onclick="toggleMoyuHeader()" title="展开/收起题库分类栏 (快捷键 H)">[Filter: H]</button>
+      <button class="moyu-tool-link" onclick="startMockExam()" title="开启全真100题模拟考试">[Bench]</button>
       <button class="moyu-tool-link" onclick="openCheatSheet()" title="查看速记口诀表">[Docs]</button>
       <button class="moyu-tool-link" onclick="openSheet()" title="打开答题卡">[Index]</button>
       <button class="moyu-tool-link" onclick="toggleBossScreen()" title="切换全屏报表 (快捷键 ` 或 X)">[Table: X]</button>
@@ -1649,13 +1672,13 @@
   <!-- Mock Exam Status Banner -->
   <div class="exam-banner" id="examBanner">
     <div>
-      <strong>🎯 全真模考（100题 / 90分及格）</strong>
+      <strong id="examBannerTitle">🎯 全真模考（100题 / 90分及格）</strong>
       <div style="font-size:0.8rem; opacity:0.92; margin-top:2px;" id="examLiveStat">已答 0/100 ｜ 对 0 ｜ 错 0 (错11题挂科)</div>
     </div>
     <div style="display:flex; align-items:center; gap:6px;">
       <span class="exam-timer" id="examTimerText">45:00</span>
-      <button class="btn btn-primary" onclick="submitMockExam()">交卷</button>
-      <button class="btn btn-outline" style="color:#1f2937;" onclick="exitMockExam()">退出</button>
+      <button class="btn btn-primary" id="examSubmitBtn" onclick="submitMockExam()">交卷</button>
+      <button class="btn btn-outline" id="examExitBtn" style="color:#1f2937;" onclick="exitMockExam()">退出</button>
     </div>
   </div>
 
@@ -2212,6 +2235,14 @@ function applyMoyuUI() {
     if (wbRemBtn) wbRemBtn.innerText = 'Pop Item';
     const wbClrBtn = document.getElementById('wbClearAllBtn');
     if (wbClrBtn) wbClrBtn.innerText = 'Clear All';
+    const examBtn = document.getElementById('examBtn');
+    if (examBtn) examBtn.innerText = 'Bench';
+    const examTitle = document.getElementById('examBannerTitle');
+    if (examTitle) examTitle.innerText = '[BENCH_SUITE: 100]';
+    const examSubBtn = document.getElementById('examSubmitBtn');
+    if (examSubBtn) examSubBtn.innerText = 'Commit';
+    const examExtBtn = document.getElementById('examExitBtn');
+    if (examExtBtn) examExtBtn.innerText = 'Abort';
 
     document.title = MOYU_TITLES[moyuSkin] || MOYU_TITLES.code;
     if (brandTitle) {
@@ -2241,6 +2272,14 @@ function applyMoyuUI() {
     if (wbRemBtn) wbRemBtn.innerText = '✅ 移出本题';
     const wbClrBtn = document.getElementById('wbClearAllBtn');
     if (wbClrBtn) wbClrBtn.innerText = '🗑️ 清空错题本';
+    const examBtn = document.getElementById('examBtn');
+    if (examBtn) examBtn.innerText = '🎯 模考';
+    const examTitle = document.getElementById('examBannerTitle');
+    if (examTitle) examTitle.innerText = '🎯 全真模考（100题 / 90分及格）';
+    const examSubBtn = document.getElementById('examSubmitBtn');
+    if (examSubBtn) examSubBtn.innerText = '交卷';
+    const examExtBtn = document.getElementById('examExitBtn');
+    if (examExtBtn) examExtBtn.innerText = '退出';
 
     document.title = NORMAL_TITLE;
     if (brandTitle) {
@@ -2980,8 +3019,9 @@ function updateCounts() {
 
   if (isMockExam) {
     let wrongInExam = doneInPool - correctInPool;
-    document.getElementById('examLiveStat').innerText =
-      `已答 ${doneInPool}/100 ｜ 对 ${correctInPool} ｜ 错 ${wrongInExam} ${wrongInExam >= 11 ? '⚠️已超11题' : '(错11题挂科)'}`;
+    document.getElementById('examLiveStat').innerText = isMoyuMode
+      ? `Run: ${doneInPool}/100 | Pass: ${correctInPool} | Fail: ${wrongInExam} ${wrongInExam >= 11 ? '[WARN >10]' : '(MaxFail: 10)'}`
+      : `已答 ${doneInPool}/100 ｜ 对 ${correctInPool} ｜ 错 ${wrongInExam} ${wrongInExam >= 11 ? '⚠️已超11题' : '(错11题挂科)'}`;
   }
 }
 
@@ -3444,6 +3484,8 @@ function startMockExam() {
 
   document.getElementById('examBanner').style.display = 'flex';
   document.getElementById('filterBarContainer').style.display = 'none';
+  document.getElementById('examTimerText').innerText = '45:00';
+  applyMoyuUI();
 
   if (mockTimer) clearInterval(mockTimer);
   mockTimer = setInterval(() => {
