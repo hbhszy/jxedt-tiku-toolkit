@@ -193,6 +193,9 @@
     border-color: #2563eb;
     color: #fff;
   }
+  .chip-done {
+    font-weight: 600;
+  }
 
   /* Exam Banner */
   .exam-banner {
@@ -1099,7 +1102,9 @@
   }
   body.moyu-active.moyu-code .filter-chip.active {
     color: #9cdcfe !important;
-    border-bottom-color: #569cd6 !important;
+    background: rgba(56, 139, 253, 0.14) !important;
+    border-color: rgba(86, 156, 214, 0.45) !important;
+    border-bottom: 2px solid #569cd6 !important;
   }
   body.moyu-active.moyu-code .card {
     background: transparent;
@@ -1602,14 +1607,14 @@
   <div class="filter-container mobile-collapsed" id="filterBarContainer">
     <!-- Always visible single-row swipeable core filters -->
     <div class="filter-row" id="targetFilters">
-      <div class="filter-chip core-chip active" data-filter="core" onclick="setFilter('core', this)">🔥 6号必刷核心 (376)</div>
-      <div class="filter-chip" data-filter="local" onclick="setFilter('local', this)">📍 无锡特产 (74)</div>
-      <div class="filter-chip" data-filter="special" onclick="setFilter('special', this)">🔤 缩写/新规 (27)</div>
-      <div class="filter-chip" data-filter="highErr" onclick="setFilter('highErr', this)">⚡ 杀手题≥35% (253)</div>
+      <div class="filter-chip core-chip active" data-filter="core" onclick="setFilter('core', this)">🔥 6号必刷核心 (<span class="chip-done" id="done-core">0</span>/<span id="tot-core">376</span>)</div>
+      <div class="filter-chip" data-filter="local" onclick="setFilter('local', this)">📍 无锡特产 (<span class="chip-done" id="done-local">0</span>/<span id="tot-local">74</span>)</div>
+      <div class="filter-chip" data-filter="special" onclick="setFilter('special', this)">🔤 缩写/新规 (<span class="chip-done" id="done-special">0</span>/<span id="tot-special">27</span>)</div>
+      <div class="filter-chip" data-filter="highErr" onclick="setFilter('highErr', this)">⚡ 杀手题≥35% (<span class="chip-done" id="done-highErr">0</span>/<span id="tot-highErr">253</span>)</div>
       <div class="filter-chip" data-filter="wrongBook" onclick="setFilter('wrongBook', this)">❌ 错题本 (<span id="wrongCountBadge">0</span>)</div>
-      <div class="filter-chip" data-filter="hasMedia" onclick="setFilter('hasMedia', this)">🖼️ 带图题 (346)</div>
+      <div class="filter-chip" data-filter="hasMedia" onclick="setFilter('hasMedia', this)">🖼️ 带图题 (<span class="chip-done" id="done-hasMedia">0</span>/<span id="tot-hasMedia">346</span>)</div>
       <div class="filter-chip" data-filter="killedBook" onclick="setFilter('killedBook', this)">✂️ 已斩 (<span id="killedChipCount">0</span>)</div>
-      <div class="filter-chip" data-filter="all" onclick="setFilter('all', this)">📚 全库 (805)</div>
+      <div class="filter-chip" data-filter="all" onclick="setFilter('all', this)">📚 全库 (<span class="chip-done" id="done-all">0</span>/<span id="tot-all">805</span>)</div>
     </div>
 
     <!-- Collapsible drawer on mobile (always expanded on desktop) -->
@@ -1628,13 +1633,13 @@
         </div>
       </div>
       <div class="filter-row" id="topicFilters">
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('记分扣分', this)">🔢 记分扣分 (109)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('标志标线', this)">🚸 标志标线 (213)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('车速限速', this)">🚗 车速限速 (65)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('距离与时间', this)">📏 距离与时间 (68)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('交警手势与信号', this)">👮 交警手势 (58)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('罚款与刑期', this)">⚖️ 罚款刑期 (53)</div>
-        <div class="filter-chip topic-chip" onclick="setTopicFilter('安全常识与应急', this)">🛡️ 规则与应急 (239)</div>
+        <div class="filter-chip topic-chip" data-topic="记分扣分" onclick="setTopicFilter('记分扣分', this)">🔢 记分扣分 (<span class="chip-done" id="done-topic-记分扣分">0</span>/<span id="tot-topic-记分扣分">109</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="标志标线" onclick="setTopicFilter('标志标线', this)">🚸 标志标线 (<span class="chip-done" id="done-topic-标志标线">0</span>/<span id="tot-topic-标志标线">213</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="车速限速" onclick="setTopicFilter('车速限速', this)">🚗 车速限速 (<span class="chip-done" id="done-topic-车速限速">0</span>/<span id="tot-topic-车速限速">65</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="距离与时间" onclick="setTopicFilter('距离与时间', this)">📏 距离与时间 (<span class="chip-done" id="done-topic-距离与时间">0</span>/<span id="tot-topic-距离与时间">68</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="交警手势与信号" onclick="setTopicFilter('交警手势与信号', this)">👮 交警手势 (<span class="chip-done" id="done-topic-交警手势与信号">0</span>/<span id="tot-topic-交警手势与信号">58</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="罚款与刑期" onclick="setTopicFilter('罚款与刑期', this)">⚖️ 罚款刑期 (<span class="chip-done" id="done-topic-罚款与刑期">0</span>/<span id="tot-topic-罚款与刑期">53</span>)</div>
+        <div class="filter-chip topic-chip" data-topic="安全常识与应急" onclick="setTopicFilter('安全常识与应急', this)">🛡️ 规则与应急 (<span class="chip-done" id="done-topic-安全常识与应急">0</span>/<span id="tot-topic-安全常识与应急">239</span>)</div>
       </div>
     </div>
   </div>
@@ -1660,15 +1665,18 @@
       <strong>📕 错题本独立重做</strong>（本轮已练 0/0 ｜ 答对 0 ｜ 答错 0）
     </div>
     <div class="wrongbook-actions">
-      <label class="wb-toggle-label" title="勾选后，在错题本中重新答对的题目将自动从错题本移出">
-        <input type="checkbox" id="autoRemoveWrongToggle" onchange="toggleAutoRemoveWrong(this.checked)">
+      <label class="wb-toggle-label" title="勾选后，在错题本中重新答对的题目将自动从错题本移出，并同步将全库答题卡改为绿色">
+        <input type="checkbox" id="autoRemoveWrongToggle" checked onchange="toggleAutoRemoveWrong(this.checked)">
         <span id="wbAutoRemoveLabel">答对自动移出</span>
       </label>
       <button class="btn btn-outline" id="wbRedoAllBtn" onclick="resetWrongBookPractice()" title="清空错题本本轮重做痕迹，从第1题重新做一遍（不会删除错题）" style="padding:4px 9px; font-size:0.78rem;">
         🔄 重刷错题
       </button>
-      <button class="btn btn-outline" id="wbRemoveCurBtn" onclick="removeCurrentFromWrongBook()" title="已掌握这道错题？点此将它从错题本移出" style="padding:4px 9px; font-size:0.78rem;">
+      <button class="btn btn-outline" id="wbRemoveCurBtn" onclick="removeCurrentFromWrongBook()" title="已掌握这道错题？点此将它从错题本移出并订正为绿色" style="padding:4px 9px; font-size:0.78rem;">
         ✅ 移出本题
+      </button>
+      <button class="btn btn-outline" id="wbClearAllBtn" onclick="clearWrongBook()" title="清空错题本全部错题，并将全库答题卡中对应题目的红色状态全部订正为绿色" style="padding:4px 9px; font-size:0.78rem; color:#dc2626; border-color:#fca5a5;">
+        🗑️ 清空错题本
       </button>
     </div>
   </div>
@@ -1995,11 +2003,53 @@ let mockAnswers = {};
 
 let userHistory = JSON.parse(localStorage.getItem('wx_km1_history') || '{}');
 let wrongBookHistory = JSON.parse(localStorage.getItem('wx_km1_wrong_history') || '{}');
-let autoRemoveWrongOnCorrect = localStorage.getItem('wx_km1_auto_remove_wrong') === '1';
+let autoRemoveWrongOnCorrect = localStorage.getItem('wx_km1_auto_remove_wrong') !== '0';
 let wrongList = JSON.parse(localStorage.getItem('wx_km1_wrongs') || '[]');
 let killedList = JSON.parse(localStorage.getItem('wx_km1_killed') || '[]');
 let savedPositions = JSON.parse(localStorage.getItem('wx_km1_positions') || '{}');
 let savedLastView = JSON.parse(localStorage.getItem('wx_km1_last_view') || 'null');
+const QUESTION_BY_ID = new Map(RAW_QUESTIONS.map(q => [q.id, q]));
+
+function reconcileWrongBookAndHistory() {
+  let changed = false;
+  // 1. Any question answered correctly in wrongBookHistory updates userHistory to green (and auto-removes if enabled)
+  for (const [qidStr, wbAns] of Object.entries(wrongBookHistory)) {
+    if (wbAns && wbAns.correct) {
+      const qid = Number(qidStr);
+      const q = QUESTION_BY_ID.get(qid);
+      const cleanChoice = wbAns.choice || (q ? getCleanAnsLetters(q) : 'A');
+      if (!userHistory[qid] || !userHistory[qid].correct) {
+        userHistory[qid] = { choice: cleanChoice, correct: true };
+        changed = true;
+      }
+      if (autoRemoveWrongOnCorrect) {
+        const wIdx = wrongList.indexOf(qid);
+        if (wIdx !== -1) wrongList.splice(wIdx, 1);
+        delete wrongBookHistory[qid];
+        changed = true;
+      }
+    }
+  }
+  // 2. Any question marked wrong in userHistory that is no longer in wrongList was already removed from wrongBook -> mark rectified (green)
+  const wrongSet = new Set(wrongList.map(Number));
+  for (const [qidStr, uAns] of Object.entries(userHistory)) {
+    const qid = Number(qidStr);
+    if (uAns && !uAns.correct && !wrongSet.has(qid)) {
+      const q = QUESTION_BY_ID.get(qid);
+      userHistory[qid] = {
+        choice: q ? getCleanAnsLetters(q) : (uAns.choice || 'A'),
+        correct: true
+      };
+      changed = true;
+    }
+  }
+  if (changed) {
+    localStorage.setItem('wx_km1_history', JSON.stringify(userHistory));
+    localStorage.setItem('wx_km1_wrong_history', JSON.stringify(wrongBookHistory));
+    localStorage.setItem('wx_km1_wrongs', JSON.stringify(wrongList));
+  }
+  return changed;
+}
 
 function isWrongBookView() {
   return !isMockExam && !currentTopic && currentFilter === 'wrongBook';
@@ -2160,6 +2210,8 @@ function applyMoyuUI() {
     if (wbRedoBtn) wbRedoBtn.innerText = 'Reset Queue';
     const wbRemBtn = document.getElementById('wbRemoveCurBtn');
     if (wbRemBtn) wbRemBtn.innerText = 'Pop Item';
+    const wbClrBtn = document.getElementById('wbClearAllBtn');
+    if (wbClrBtn) wbClrBtn.innerText = 'Clear All';
 
     document.title = MOYU_TITLES[moyuSkin] || MOYU_TITLES.code;
     if (brandTitle) {
@@ -2187,6 +2239,8 @@ function applyMoyuUI() {
     if (wbRedoBtn) wbRedoBtn.innerText = '🔄 重刷错题';
     const wbRemBtn = document.getElementById('wbRemoveCurBtn');
     if (wbRemBtn) wbRemBtn.innerText = '✅ 移出本题';
+    const wbClrBtn = document.getElementById('wbClearAllBtn');
+    if (wbClrBtn) wbClrBtn.innerText = '🗑️ 清空错题本';
 
     document.title = NORMAL_TITLE;
     if (brandTitle) {
@@ -2238,6 +2292,7 @@ function saveState() {
   localStorage.setItem('wx_km1_wrong_history', JSON.stringify(wrongBookHistory));
   localStorage.setItem('wx_km1_wrongs', JSON.stringify(wrongList));
   localStorage.setItem('wx_km1_killed', JSON.stringify(killedList));
+  localStorage.setItem('wx_km1_last_ts', String(Date.now()));
   updateCounts();
   hasUnsyncedChanges = true;
   scheduleAutoCloudSync();
@@ -2350,10 +2405,35 @@ function applySyncPayload(remote, mode = 'merge') {
     if (remote.savedLastView) savedLastView = remote.savedLastView;
   } else {
     // Smart merge: combine answered history, wrongs, killed, and take newer position per category
-    userHistory = { ...(remote.userHistory || {}), ...userHistory };
-    wrongBookHistory = { ...(remote.wrongBookHistory || {}), ...wrongBookHistory };
+    const localTs = Number(localStorage.getItem('wx_km1_last_ts') || 0);
+    const remoteTs = Number(remote.updatedAt || 0);
+    const localIsNewer = localTs >= remoteTs;
+    const remHist = remote.userHistory || {};
+    const remWbHist = remote.wrongBookHistory || {};
+
+    const mergedHist = { ...remHist, ...userHistory };
+    for (const qid of Object.keys(mergedHist)) {
+      const lEntry = userHistory[qid];
+      const rEntry = remHist[qid];
+      if (lEntry && rEntry) {
+        if (lEntry.correct !== rEntry.correct) {
+          mergedHist[qid] = (localTs && remoteTs)
+            ? (localIsNewer ? lEntry : rEntry)
+            : (lEntry.correct ? lEntry : rEntry);
+        } else {
+          mergedHist[qid] = localIsNewer ? lEntry : rEntry;
+        }
+      }
+    }
+    userHistory = mergedHist;
+    wrongBookHistory = localIsNewer
+      ? { ...remWbHist, ...wrongBookHistory }
+      : { ...wrongBookHistory, ...remWbHist };
+
+    // Do not resurrect wrong questions that have already been rectified (correct: true in userHistory)
     const wSet = new Set([...(remote.wrongList || []), ...wrongList]);
-    wrongList = Array.from(wSet);
+    wrongList = Array.from(wSet).filter(id => !(userHistory[id] && userHistory[id].correct));
+
     const kSet = new Set([...(remote.killedList || []), ...killedList]);
     killedList = Array.from(kSet);
 
@@ -2363,10 +2443,12 @@ function applySyncPayload(remote, mode = 'merge') {
         savedPositions[k] = remPos[k];
       }
     }
-    if (remote.savedLastView && (!savedLastView || (remote.updatedAt || 0) > (localStorage.getItem('wx_km1_last_ts') || 0))) {
+    if (remote.savedLastView && (!savedLastView || remoteTs > localTs)) {
       savedLastView = remote.savedLastView;
     }
   }
+
+  reconcileWrongBookAndHistory();
 
   localStorage.setItem('wx_km1_history', JSON.stringify(userHistory));
   localStorage.setItem('wx_km1_wrong_history', JSON.stringify(wrongBookHistory));
@@ -2378,11 +2460,15 @@ function applySyncPayload(remote, mode = 'merge') {
     if (savedLastView.topic) {
       currentTopic = savedLastView.topic;
       clearFilterActiveStates();
-      document.querySelectorAll('#topicFilters .filter-chip').forEach(el => {
-        if (el.innerText.includes(currentTopic)) el.classList.add('active');
-      });
+      const tChip = document.querySelector(`#topicFilters .filter-chip[data-topic="${currentTopic}"]`);
+      if (tChip) tChip.classList.add('active');
     } else if (savedLastView.filter) {
-      currentFilter = savedLastView.filter;
+      if ((savedLastView.filter === 'wrongBook' && wrongList.length === 0) ||
+          (savedLastView.filter === 'killedBook' && killedList.length === 0)) {
+        currentFilter = 'core';
+      } else {
+        currentFilter = savedLastView.filter;
+      }
       currentTopic = null;
       clearFilterActiveStates();
       const chip = document.querySelector(`[data-filter="${currentFilter}"]`);
@@ -2559,16 +2645,7 @@ async function pullFromCloud(mode = 'merge', silent = false) {
     if (fileObj && fileObj.content) {
       hadRemoteData = true;
       const remotePayload = JSON.parse(fileObj.content);
-
-      if (mode === 'merge') {
-        const remoteHist = remotePayload.userHistory || {};
-        for (const qid of Object.keys(userHistory)) {
-          if (!remoteHist[qid]) {
-            localHadNewerChanges = true;
-            break;
-          }
-        }
-      }
+      const remoteSig = getSyncDataSignature(remotePayload);
 
       isApplyingRemoteSync = true;
       try {
@@ -2578,7 +2655,11 @@ async function pullFromCloud(mode = 'merge', silent = false) {
       }
 
       const mergedPayload = buildSyncPayload();
-      lastSyncedDataHash = getSyncDataSignature(mergedPayload);
+      const mergedSig = getSyncDataSignature(mergedPayload);
+      if (mode === 'merge' && mergedSig !== remoteSig) {
+        localHadNewerChanges = true;
+      }
+      lastSyncedDataHash = remoteSig;
       localStorage.setItem('wx_km1_synced_hash', lastSyncedDataHash);
     }
 
@@ -2724,6 +2805,13 @@ function toggleAutoNext(checked) {
 function toggleAutoRemoveWrong(checked) {
   autoRemoveWrongOnCorrect = checked;
   localStorage.setItem('wx_km1_auto_remove_wrong', checked ? '1' : '0');
+  if (checked && reconcileWrongBookAndHistory()) {
+    saveState();
+    if (isWrongBookView()) {
+      applyFilters();
+    }
+    renderQuestion();
+  }
 }
 
 function resetWrongBookPractice(silent = false) {
@@ -2748,12 +2836,40 @@ function removeCurrentFromWrongBook() {
   if (idx !== -1) {
     wrongList.splice(idx, 1);
     delete wrongBookHistory[q.id];
+    userHistory[q.id] = { choice: getCleanAnsLetters(q), correct: true };
     saveState();
     if (isWrongBookView()) {
       applyFilters();
     }
     renderQuestion();
   }
+}
+
+function clearWrongBook() {
+  if (wrongList.length === 0) {
+    alert('当前错题本已经是空的！');
+    return;
+  }
+  if (!confirm(`确定要清空错题本中的全部 ${wrongList.length} 道错题，并将它们在全库答题卡中的状态同步订正为正确（绿色）吗？`)) {
+    return;
+  }
+  wrongList.forEach(id => {
+    const q = QUESTION_BY_ID.get(Number(id));
+    userHistory[id] = {
+      choice: q ? getCleanAnsLetters(q) : (userHistory[id]?.choice || 'A'),
+      correct: true
+    };
+  });
+  wrongList = [];
+  wrongBookHistory = {};
+  delete savedPositions['filter:wrongBook'];
+  localStorage.setItem('wx_km1_positions', JSON.stringify(savedPositions));
+  currentIndex = 0;
+  saveState();
+  if (isWrongBookView()) {
+    applyFilters();
+  }
+  renderQuestion();
 }
 
 function redoCurrentQuestion() {
@@ -2802,6 +2918,35 @@ function updateCounts() {
   document.getElementById('wrongCountBadge').innerText = wrongList.length;
   document.getElementById('killedCountBadge').innerText = killedList.length;
   document.getElementById('killedChipCount').innerText = killedList.length;
+
+  // Per-category progress: show 已答/总数 + 未答 on each filter chip
+  try {
+    const filterDefs = [
+      ['core', q => q.core],
+      ['local', q => q.scope !== '全国通用题'],
+      ['special', q => q.is_special],
+      ['highErr', q => q.err_num >= 35.0],
+      ['hasMedia', q => q.img && q.img.trim()],
+      ['all', () => true]
+    ];
+    filterDefs.forEach(([key, pred]) => {
+      const pool = RAW_QUESTIONS.filter(q => pred(q) && (!hideKilled || !killedList.includes(q.id)));
+      const done = pool.filter(q => userHistory[q.id]).length;
+      const dEl = document.getElementById('done-' + key);
+      const tEl = document.getElementById('tot-' + key);
+      if (dEl) dEl.innerText = done;
+      if (tEl) tEl.innerText = pool.length;
+    });
+    document.querySelectorAll('#topicFilters .filter-chip[data-topic]').forEach(el => {
+      const cat = el.getAttribute('data-topic');
+      const pool = RAW_QUESTIONS.filter(q => q.cat === cat && (!hideKilled || !killedList.includes(q.id)));
+      const done = pool.filter(q => userHistory[q.id]).length;
+      const dEl = document.getElementById('done-topic-' + cat);
+      const tEl = document.getElementById('tot-topic-' + cat);
+      if (dEl) dEl.innerText = done;
+      if (tEl) tEl.innerText = pool.length;
+    });
+  } catch(e) { console.warn('updateChipProgress failed', e); }
 
   let activePool = filteredQuestions;
   let historyMap = getActiveHistoryMap();
@@ -3186,8 +3331,18 @@ function recordAnswer(q, chosenStr, isCorrect) {
     userHistory[q.id] = { choice: chosenStr, correct: isCorrect };
   } else if (inWrongBook) {
     wrongBookHistory[q.id] = { choice: chosenStr, correct: isCorrect };
+    if (isCorrect) {
+      userHistory[q.id] = { choice: chosenStr, correct: true };
+    }
   } else {
     userHistory[q.id] = { choice: chosenStr, correct: isCorrect };
+    if (isCorrect && autoRemoveWrongOnCorrect) {
+      const wIdx = wrongList.indexOf(q.id);
+      if (wIdx !== -1) {
+        wrongList.splice(wIdx, 1);
+        delete wrongBookHistory[q.id];
+      }
+    }
   }
 
   if (!isCorrect) {
@@ -3582,14 +3737,14 @@ window.addEventListener('keydown', (e) => {
 // Init: Restore last active filter/topic & question position
 const autoRemToggle = document.getElementById('autoRemoveWrongToggle');
 if (autoRemToggle) autoRemToggle.checked = autoRemoveWrongOnCorrect;
+reconcileWrongBookAndHistory();
 applyMoyuUI();
 if (savedLastView) {
   if (savedLastView.topic) {
     currentTopic = savedLastView.topic;
     clearFilterActiveStates();
-    document.querySelectorAll('#topicFilters .filter-chip').forEach(el => {
-      if (el.innerText.includes(currentTopic)) el.classList.add('active');
-    });
+    const tChip = document.querySelector(`#topicFilters .filter-chip[data-topic="${currentTopic}"]`);
+    if (tChip) tChip.classList.add('active');
   } else if (savedLastView.filter) {
     // Only restore wrongBook/killedBook if non-empty
     if ((savedLastView.filter === 'wrongBook' && wrongList.length === 0) ||
